@@ -1,0 +1,76 @@
+"use client";
+
+import { useState } from "react";
+import { updateCard } from "@/actions/card.actions";
+
+type Props = {
+  cardId: string;
+  description: string | null;
+  onUpdate: (desc: string | null) => void;
+};
+
+export default function CardDescription({
+  cardId,
+  description,
+  onUpdate,
+}: Props) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(description ?? "");
+
+  async function handleSave() {
+    const newDesc = value.trim() || null;
+    if (newDesc === description) {
+      setEditing(false);
+      return;
+    }
+    await updateCard({ id: cardId, description: newDesc });
+    onUpdate(newDesc);
+    setEditing(false);
+  }
+
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+        📝 説明
+      </h3>
+      {editing ? (
+        <div className="space-y-2">
+          <textarea
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            autoFocus
+            rows={4}
+            placeholder="説明を追加..."
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={handleSave}
+              className="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-sm rounded-lg transition-colors"
+            >
+              保存
+            </button>
+            <button
+              onClick={() => {
+                setValue(description ?? "");
+                setEditing(false);
+              }}
+              className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 text-sm rounded-lg transition-colors"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          onClick={() => setEditing(true)}
+          className={`w-full min-h-[60px] px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-slate-100 transition-colors ${
+            description ? "text-slate-700" : "text-slate-400"
+          }`}
+        >
+          {description ?? "説明を追加するにはクリックしてください..."}
+        </div>
+      )}
+    </div>
+  );
+}

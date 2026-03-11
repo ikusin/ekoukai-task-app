@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(taskkill:*)",
+      "Bash(Remove-Item -Recurse -Force \"c:/Users/staff-102/Desktop/プロジェクト管理ツール/.next\")"
+    ]
+  }
+}
