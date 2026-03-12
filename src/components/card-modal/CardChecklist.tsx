@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckSquare, X, Plus } from "lucide-react";
+import * as Popover from "@radix-ui/react-popover";
+import { CheckSquare, X, Plus, UserPlus } from "lucide-react";
 import {
   addChecklistItem,
   toggleChecklistItem,
@@ -9,13 +10,16 @@ import {
   deleteChecklist,
   updateChecklist,
   updateChecklistItemDueDate,
+  updateChecklistItemAssignee,
   saveChecklistAsTemplate,
 } from "@/actions/checklist.actions";
-import { isOverdue, formatDate } from "@/lib/utils";
+import { isOverdue, formatDate, getMemberInitials, getMemberDisplayName } from "@/lib/utils";
 import type { ChecklistWithItems, ChecklistTemplateWithItems } from "@/types/app.types";
+import type { Member } from "@/types/app.types";
 
 type Props = {
   checklist: ChecklistWithItems;
+  boardMembers?: Member[];
   onDeleted: (checklistId: string) => void;
   onUpdated: (checklist: ChecklistWithItems) => void;
   onTemplateSaved?: (template: ChecklistTemplateWithItems) => void;
@@ -23,6 +27,7 @@ type Props = {
 
 export default function CardChecklist({
   checklist,
+  boardMembers = [],
   onDeleted,
   onUpdated,
   onTemplateSaved,
@@ -74,6 +79,17 @@ export default function CardChecklist({
     if (result.data) {
       const updated = items.map((i) =>
         i.id === itemId ? { ...i, due_date: newDate } : i
+      );
+      setItems(updated);
+      onUpdated({ ...checklist, checklist_items: updated });
+    }
+  }
+
+  async function handleAssignee(itemId: string, assigneeId: string | null) {
+    const result = await updateChecklistItemAssignee(itemId, assigneeId);
+    if (result.data) {
+      const updated = items.map((i) =>
+        i.id === itemId ? { ...i, assignee_id: assigneeId } : i
       );
       setItems(updated);
       onUpdated({ ...checklist, checklist_items: updated });
@@ -172,6 +188,8 @@ export default function CardChecklist({
       <div className="space-y-1.5 mb-3">
         {items.map((item) => {
           const overdue = isOverdue(item.due_date ?? null);
+          const assignee = boardMembers.find((m) => m.id === item.assignee_id) ?? null;
+
           return (
             <div key={item.id} className="flex items-center gap-2 group">
               <input
@@ -188,6 +206,22 @@ export default function CardChecklist({
                 {item.text}
               </span>
 
+              {/* Assignee badge (always visible when set) */}
+              {assignee && (
+                <span
+                  className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0 flex items-center gap-1"
+                  title={getMemberDisplayName(assignee.name)}
+                >
+                  <span
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                    style={{ backgroundColor: assignee.color }}
+                  >
+                    {getMemberInitials(assignee.name)}
+                  </span>
+                  {getMemberDisplayName(assignee.name)}
+                </span>
+              )}
+
               {/* Due date badge (always visible when set) */}
               {item.due_date && (
                 <span
@@ -201,7 +235,58 @@ export default function CardChecklist({
                 </span>
               )}
 
-              {/* Date input (shown on row hover) */}
+              {/* Assignee picker (hover) */}
+              {boardMembers.length > 0 && (
+                <Popover.Root>
+                  <Popover.Trigger asChild>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity"
+                      title="担当者を設定"
+                    >
+                      <UserPlus size={13} className="text-slate-400 hover:text-sky-500" />
+                    </button>
+                  </Popover.Trigger>
+                  <Popover.Portal>
+                    <Popover.Content
+                      side="top"
+                      align="end"
+                      sideOffset={4}
+                      className="z-[110] w-44 bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+                    >
+                      <p className="text-xs text-slate-400 px-2 py-1">担当者</p>
+                      {assignee && (
+                        <button
+                          onClick={() => handleAssignee(item.id, null)}
+                          className="w-full text-left text-xs px-2 py-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-500 transition-colors"
+                        >
+                          解除
+                        </button>
+                      )}
+                      {boardMembers.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => handleAssignee(item.id, m.id)}
+                          className={`w-full flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-colors ${
+                            m.id === item.assignee_id
+                              ? "bg-sky-50 text-sky-700"
+                              : "hover:bg-slate-50 text-slate-700"
+                          }`}
+                        >
+                          <span
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                            style={{ backgroundColor: m.color }}
+                          >
+                            {getMemberInitials(m.name)}
+                          </span>
+                          <span className="truncate">{getMemberDisplayName(m.name)}</span>
+                        </button>
+                      ))}
+                    </Popover.Content>
+                  </Popover.Portal>
+                </Popover.Root>
+              )}
+
+              {/* Date input (hover) */}
               <input
                 type="date"
                 value={item.due_date ?? ""}

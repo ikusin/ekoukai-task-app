@@ -207,6 +207,7 @@ export interface Database {
           is_done: boolean;
           order: number;
           due_date: string | null;
+          assignee_id: string | null;
         };
         Insert: {
           id?: string;
@@ -215,6 +216,7 @@ export interface Database {
           is_done?: boolean;
           order?: number;
           due_date?: string | null;
+          assignee_id?: string | null;
         };
         Update: {
           id?: string;
@@ -223,6 +225,7 @@ export interface Database {
           is_done?: boolean;
           order?: number;
           due_date?: string | null;
+          assignee_id?: string | null;
         };
       };
       checklist_templates: {

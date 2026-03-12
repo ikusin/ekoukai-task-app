@@ -190,6 +190,28 @@ export async function updateChecklistItemDueDate(
   return { data: data as unknown as ChecklistItem };
 }
 
+export async function updateChecklistItemAssignee(
+  id: string,
+  assignee_id: string | null
+) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data, error } = await supabase
+    .from("checklist_items")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .update({ assignee_id } as any)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  return { data: data as unknown as ChecklistItem };
+}
+
 export async function deleteChecklistItem(id: string) {
   const supabase = createClient();
   const {

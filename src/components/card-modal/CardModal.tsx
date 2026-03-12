@@ -59,7 +59,7 @@ export default function CardModal() {
           card_members ( member_id, members ( id, board_id, name, color ) ),
           checklists (
             id, card_id, title,
-            checklist_items ( id, checklist_id, text, is_done, order, due_date )
+            checklist_items ( id, checklist_id, text, is_done, order, due_date, assignee_id )
           )
         `
         )
@@ -269,6 +269,7 @@ export default function CardModal() {
                     <CardChecklist
                       key={checklist.id}
                       checklist={checklist}
+                      boardMembers={boardMembers}
                       onTemplateSaved={(tpl) =>
                         setTemplates((prev) => [tpl, ...prev])
                       }
