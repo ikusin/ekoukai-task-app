@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Users, Check } from "lucide-react";
+import { Users, Check, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { createMember } from "@/actions/member.actions";
+import { createMember, deleteMember } from "@/actions/member.actions";
 import type { Member } from "@/types/app.types";
 
 const MEMBER_COLORS = [
@@ -47,6 +47,7 @@ export default function CardMembers({
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState(MEMBER_COLORS[0]);
   const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function toggleMember(member: Member) {
     const supabase = createClient();
@@ -86,6 +87,17 @@ export default function CardMembers({
     setCreating(false);
   }
 
+  async function handleDeleteMember(member: Member, e: React.MouseEvent) {
+    e.stopPropagation();
+    setDeletingId(member.id);
+    await deleteMember(member.id, boardId);
+    setMembers((prev) => prev.filter((m) => m.id !== member.id));
+    const updatedActive = active.filter((m) => m.id !== member.id);
+    setActive(updatedActive);
+    onUpdate(updatedActive);
+    setDeletingId(null);
+  }
+
   return (
     <div>
       <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
@@ -98,7 +110,6 @@ export default function CardMembers({
             className="flex items-center gap-1.5 px-2 py-1 rounded-full text-white text-xs font-medium"
             style={{ backgroundColor: member.color }}
           >
-            <span>{getInitials(member.name)}</span>
             <span>{member.name}</span>
           </div>
         ))}
@@ -132,24 +143,36 @@ export default function CardMembers({
               {members.map((member) => {
                 const isActive = active.some((m) => m.id === member.id);
                 return (
-                  <button
+                  <div
                     key={member.id}
-                    onClick={() => toggleMember(member)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors group"
                   >
-                    <span
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                      style={{ backgroundColor: member.color }}
+                    <button
+                      onClick={() => toggleMember(member)}
+                      className="flex items-center gap-2 flex-1 min-w-0"
                     >
-                      {getInitials(member.name)}
-                    </span>
-                    <span className="flex-1 text-sm text-left text-slate-700">
-                      {member.name}
-                    </span>
-                    {isActive && (
-                      <Check size={14} className="text-sky-500" />
-                    )}
-                  </button>
+                      <span
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                        style={{ backgroundColor: member.color }}
+                      >
+                        {getInitials(member.name)}
+                      </span>
+                      <span className="flex-1 text-sm text-left text-slate-700 truncate">
+                        {member.name}
+                      </span>
+                      {isActive && (
+                        <Check size={14} className="text-sky-500 flex-shrink-0" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteMember(member, e)}
+                      disabled={deletingId === member.id}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all flex-shrink-0 disabled:opacity-50"
+                      title="メンバーを削除"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 );
               })}
             </div>
