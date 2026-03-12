@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Menu } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -121,7 +122,7 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
         onClick={() => setMobileOpen(true)}
         className="md:hidden fixed top-3 left-3 z-30 p-2 bg-slate-900 rounded-lg shadow-md text-slate-300"
       >
-        ☰
+        <Menu size={20} />
       </button>
 
       {/* Mobile overlay */}

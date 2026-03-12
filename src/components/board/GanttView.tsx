@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, ChevronDown } from "lucide-react";
 import { useCardModal } from "@/context/CardModalContext";
 import type { BoardState, CardWithLabels } from "@/types/app.types";
 
@@ -85,12 +86,12 @@ export default function GanttView({ boardState }: Props) {
           onClick={() => setOffset((v) => v - 14)}
           className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded"
           title="2週間前"
-        >«</button>
+        ><ChevronsLeft size={16} /></button>
         <button
           onClick={() => setOffset((v) => v - 7)}
           className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded"
           title="1週間前"
-        >‹</button>
+        ><ChevronLeft size={16} /></button>
         <button
           onClick={() => setOffset(-14)}
           className="px-3 py-1 text-xs bg-sky-50 text-sky-600 hover:bg-sky-100 rounded font-medium"
@@ -101,12 +102,12 @@ export default function GanttView({ boardState }: Props) {
           onClick={() => setOffset((v) => v + 7)}
           className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded"
           title="1週間後"
-        >›</button>
+        ><ChevronRight size={16} /></button>
         <button
           onClick={() => setOffset((v) => v + 14)}
           className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded"
           title="2週間後"
-        >»</button>
+        ><ChevronsRight size={16} /></button>
         <span className="ml-3 text-xs text-slate-400">
           {viewStart.getFullYear()}年{viewStart.getMonth() + 1}月{viewStart.getDate()}日
           〜
@@ -192,9 +193,7 @@ export default function GanttView({ boardState }: Props) {
                     style={{ width: LEFT_W }}
                   >
                     {/* Collapse chevron */}
-                    <span className="text-slate-400 text-xs w-3 flex-shrink-0 transition-transform" style={{ display: "inline-block", transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}>
-                      ▾
-                    </span>
+                    <ChevronDown size={14} className={isCollapsed ? "rotate-[-90deg] transition-transform" : "transition-transform"} />
                     <span
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: listColor }}

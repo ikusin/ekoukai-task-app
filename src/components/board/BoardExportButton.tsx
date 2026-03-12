@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2, Upload } from "lucide-react";
 import { exportBoard } from "@/actions/board-transfer.actions";
 
 type Props = {
@@ -39,7 +40,7 @@ export default function BoardExportButton({ boardId, boardTitle }: Props) {
       className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 disabled:opacity-50"
       title="ボードをエクスポート"
     >
-      {loading ? "⏳" : "📤"} エクスポート
+      {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} エクスポート
     </button>
   );
 }

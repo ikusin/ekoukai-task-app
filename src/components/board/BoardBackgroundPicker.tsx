@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
+import { Palette } from "lucide-react";
 import { updateBoardBackground } from "@/actions/board.actions";
 
 const SOLID_COLORS = [
@@ -63,7 +64,7 @@ export default function BoardBackgroundPicker({ boardId, current, onChange }: Pr
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
           title="背景を変更"
         >
-          🎨 背景
+          <Palette size={16} /> 背景
         </button>
       </Popover.Trigger>
 

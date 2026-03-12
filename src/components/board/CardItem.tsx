@@ -2,6 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Calendar, CheckSquare, X } from "lucide-react";
 import { useCardModal } from "@/context/CardModalContext";
 import { deleteCard } from "@/actions/card.actions";
 import { cn, formatDate, isOverdue } from "@/lib/utils";
@@ -86,10 +87,10 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         <button
           onPointerDown={(e) => e.stopPropagation()}
           onClick={handleDelete}
-          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-slate-100 hover:bg-red-500 text-slate-400 hover:text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 z-10 shadow-sm"
+          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-md bg-slate-100 hover:bg-red-500 text-slate-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 z-10"
           title="カードを削除"
         >
-          ✕
+          <X size={12} />
         </button>
       )}
 
@@ -121,7 +122,8 @@ export default function CardItem({ card, isOverlay = false }: Props) {
                   : "bg-slate-50 text-slate-500 border border-slate-100"
               )}
             >
-              📅 {formatDate(card.due_date)}
+              <Calendar size={11} />
+              {formatDate(card.due_date)}
             </span>
           )}
 
@@ -134,7 +136,8 @@ export default function CardItem({ card, isOverlay = false }: Props) {
                   : "bg-slate-50 text-slate-500 border border-slate-100"
               )}
             >
-              ☑ {doneItems}/{totalItems}
+              <CheckSquare size={11} />
+              {doneItems}/{totalItems}
             </span>
           )}
 

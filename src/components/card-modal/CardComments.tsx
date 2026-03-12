@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MessageSquare } from "lucide-react";
 import { createComment, deleteComment } from "@/actions/comment.actions";
 import type { Comment } from "@/types/app.types";
 
@@ -43,7 +44,7 @@ export default function CardComments({ cardId, initialComments }: Props) {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">💬 コメント</h3>
+      <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5"><MessageSquare size={15} className="text-slate-500" /> コメント</h3>
 
       {/* Comment list */}
       {comments.length > 0 && (

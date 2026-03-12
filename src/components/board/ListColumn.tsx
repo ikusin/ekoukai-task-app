@@ -7,6 +7,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ChevronRight } from "lucide-react";
 import ListHeader from "./ListHeader";
 import CardItem from "./CardItem";
 import AddCardButton from "./AddCardButton";
@@ -71,7 +72,7 @@ export default function ListColumn({
           className="text-slate-700 hover:text-slate-900 text-xs mt-1 transition-colors"
           title="展開"
         >
-          ▶
+          <ChevronRight size={16} />
         </button>
         <span
           className="text-xs font-semibold text-slate-700"

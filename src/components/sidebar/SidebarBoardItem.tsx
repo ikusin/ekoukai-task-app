@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import * as Popover from "@radix-ui/react-popover";
+import { GripVertical, MoreHorizontal } from "lucide-react";
 import { updateBoard, deleteBoard, copyBoard } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
@@ -118,7 +119,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
             className="opacity-0 group-hover:opacity-100 pl-1.5 py-2 cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 flex-shrink-0 select-none transition-opacity"
             title="ドラッグして並び替え"
           >
-            ⠿
+            <GripVertical size={14} />
           </div>
           <Link
             href={`/boards/${board.id}`}
@@ -151,7 +152,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
                 className="p-1.5 text-slate-500 hover:text-slate-300 rounded transition-colors"
                 title="メニュー"
               >
-                ⋯
+                <MoreHorizontal size={16} />
               </button>
             </Popover.Trigger>
             <Popover.Portal>

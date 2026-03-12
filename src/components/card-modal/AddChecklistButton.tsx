@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
+import { Plus } from "lucide-react";
 import { createChecklist } from "@/actions/checklist.actions";
 import type { ChecklistWithItems, ChecklistTemplateWithItems } from "@/types/app.types";
 
@@ -42,9 +43,9 @@ export default function AddChecklistButton({
       <Popover.Trigger asChild>
         <button
           disabled={loading}
-          className="text-sm text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-3 py-2 rounded-lg transition-colors border border-dashed border-sky-300 w-full disabled:opacity-50"
+          className="text-sm text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-3 py-2 rounded-lg transition-colors border border-dashed border-sky-300 w-full disabled:opacity-50 flex items-center justify-center"
         >
-          {loading ? "追加中..." : "+ チェックリストを追加"}
+          {loading ? "追加中..." : <><Plus size={14} className="mr-1" />チェックリストを追加</>}
         </button>
       </Popover.Trigger>
 

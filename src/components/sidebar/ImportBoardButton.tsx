@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2, Download } from "lucide-react";
 import { importBoard } from "@/actions/board-transfer.actions";
 import type { BoardExportData } from "@/actions/board-transfer.actions";
 
@@ -61,12 +62,12 @@ export default function ImportBoardButton() {
       >
         {loading ? (
           <>
-            <span className="text-base leading-none">⏳</span>
+            <Loader2 size={16} className="animate-spin" />
             インポート中...
           </>
         ) : (
           <>
-            <span className="text-base leading-none">📥</span>
+            <Download size={16} />
             ボードをインポート
           </>
         )}

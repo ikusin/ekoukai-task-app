@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
+import { Users, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createMember } from "@/actions/member.actions";
 import type { Member } from "@/types/app.types";
@@ -87,8 +88,8 @@ export default function CardMembers({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-2">
-        👤 メンバー
+      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+        <Users size={15} className="text-slate-500" /> メンバー
       </h3>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {active.map((member) => (
@@ -146,7 +147,7 @@ export default function CardMembers({
                       {member.name}
                     </span>
                     {isActive && (
-                      <span className="text-sky-500 text-xs">✓</span>
+                      <Check size={14} className="text-sky-500" />
                     )}
                   </button>
                 );

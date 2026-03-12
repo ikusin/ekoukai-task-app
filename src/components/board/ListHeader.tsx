@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GripVertical, ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 import { updateList, deleteList } from "@/actions/list.actions";
 import type { List } from "@/types/app.types";
 
@@ -79,7 +80,7 @@ export default function ListHeader({
         className="text-slate-500 hover:text-slate-800 cursor-grab active:cursor-grabbing text-sm flex-shrink-0 px-0.5"
         title="ドラッグして並び替え"
       >
-        ⠿
+        <GripVertical size={16} />
       </button>
 
       {/* Collapse toggle */}
@@ -88,7 +89,7 @@ export default function ListHeader({
         className="text-slate-600 hover:text-slate-900 transition-colors text-xs flex-shrink-0"
         title={collapsed ? "展開" : "折りたたむ"}
       >
-        {collapsed ? "▶" : "▼"}
+        {collapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
       </button>
 
       {editing ? (
@@ -123,7 +124,7 @@ export default function ListHeader({
           onClick={() => setShowMenu(!showMenu)}
           className="p-1 text-slate-600 hover:text-slate-900 hover:bg-black/10 rounded transition-colors text-xs"
         >
-          ⋯
+          <MoreHorizontal size={16} />
         </button>
         {showMenu && (
           <>

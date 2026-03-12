@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Plus, X } from "lucide-react";
 import { createCard } from "@/actions/card.actions";
 import type { CardWithLabels } from "@/types/app.types";
 
@@ -39,7 +40,7 @@ export default function AddCardButton({ listId, onCardCreated }: Props) {
         }}
         className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1"
       >
-        <span>+</span> カードを追加
+        <Plus size={14} /> カードを追加
       </button>
     );
   }
@@ -81,7 +82,7 @@ export default function AddCardButton({ listId, onCardCreated }: Props) {
           }}
           className="px-3 py-1.5 text-slate-600 hover:bg-slate-200 text-xs rounded-lg transition-colors"
         >
-          ✕
+          <X size={14} />
         </button>
       </div>
     </form>

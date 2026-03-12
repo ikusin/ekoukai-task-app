@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
+import { Check, Plus } from "lucide-react";
 import { createBoard } from "@/actions/board.actions";
 
 const PRESET_COLORS = [
@@ -53,7 +54,7 @@ export default function CreateBoardModal() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-2 transition-colors">
-          <span className="text-base leading-none">+</span>
+          <Plus size={16} />
           ボードを作成
         </button>
       </Dialog.Trigger>
@@ -97,8 +98,8 @@ export default function CreateBoardModal() {
                     title={c}
                   >
                     {color === c && (
-                      <span className="flex items-center justify-center text-white text-xs font-bold">
-                        ✓
+                      <span className="flex items-center justify-center">
+                        <Check size={14} className="text-white font-bold" />
                       </span>
                     )}
                   </button>

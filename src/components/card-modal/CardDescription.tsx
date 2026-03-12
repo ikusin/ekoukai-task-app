@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AlignLeft } from "lucide-react";
 import { updateCard } from "@/actions/card.actions";
 
 type Props = {
@@ -31,7 +32,7 @@ export default function CardDescription({
   return (
     <div>
       <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-        📝 説明
+        <AlignLeft size={15} className="text-slate-500" /> 説明
       </h3>
       {editing ? (
         <div className="space-y-2">

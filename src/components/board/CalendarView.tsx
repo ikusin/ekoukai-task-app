@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { useCardModal } from "@/context/CardModalContext";
 import { isOverdue } from "@/lib/utils";
 import type { BoardState, CardWithLabels } from "@/types/app.types";
@@ -96,7 +97,7 @@ export default function CalendarView({ boardState }: Props) {
           onClick={prevMonth}
           className="p-1.5 rounded-lg hover:bg-white/60 text-slate-600 transition-colors"
         >
-          ◀
+          <ChevronLeft size={18} />
         </button>
         <h2 className="text-base font-semibold text-slate-800 min-w-[120px] text-center">
           {year}年{month + 1}月
@@ -105,7 +106,7 @@ export default function CalendarView({ boardState }: Props) {
           onClick={nextMonth}
           className="p-1.5 rounded-lg hover:bg-white/60 text-slate-600 transition-colors"
         >
-          ▶
+          <ChevronRight size={18} />
         </button>
         <button
           onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}
@@ -117,13 +118,13 @@ export default function CalendarView({ boardState }: Props) {
         {/* Range toggle */}
         <button
           onClick={() => setShowRange((v) => !v)}
-          className={`ml-auto px-3 py-1 text-sm rounded-lg border transition-colors ${
+          className={`ml-auto px-3 py-1 text-sm rounded-lg border transition-colors flex items-center ${
             showRange
               ? "bg-sky-500 text-white border-sky-500"
               : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
           }`}
         >
-          {showRange ? "📅 範囲表示: ON" : "📅 範囲表示: OFF"}
+          {showRange ? <><Calendar size={14} className="mr-1" /> 範囲表示: ON</> : <><Calendar size={14} className="mr-1" /> 範囲表示: OFF</>}
         </button>
       </div>
 
@@ -193,11 +194,11 @@ export default function CalendarView({ boardState }: Props) {
 
                   const prefix =
                     position === "start"
-                      ? "▶ "
+                      ? "→ "
                       : position === "middle"
-                      ? "─ "
+                      ? "· "
                       : position === "end"
-                      ? "◀ "
+                      ? "← "
                       : "";
 
                   return (

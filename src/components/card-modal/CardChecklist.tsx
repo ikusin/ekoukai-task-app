@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckSquare, X, Plus } from "lucide-react";
 import {
   addChecklistItem,
   toggleChecklistItem,
@@ -130,7 +131,7 @@ export default function CardChecklist({
             className="text-sm font-semibold text-slate-700 flex items-center gap-2 hover:text-slate-900 text-left flex-1 min-w-0"
             title="クリックして名前を変更"
           >
-            ☑️ {titleValue}
+            <CheckSquare size={15} className="text-slate-500 flex-shrink-0" /> {titleValue}
           </button>
         )}
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -213,7 +214,7 @@ export default function CardChecklist({
                 onClick={() => handleDeleteItem(item.id)}
                 className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-red-500 transition-all flex-shrink-0"
               >
-                ✕
+                <X size={13} />
               </button>
             </div>
           );
@@ -263,9 +264,9 @@ export default function CardChecklist({
       ) : (
         <button
           onClick={() => setAddingItem(true)}
-          className="text-sm text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-2 py-1 rounded-lg transition-colors"
+          className="text-sm text-sky-600 hover:text-sky-700 hover:bg-sky-50 px-2 py-1 rounded-lg transition-colors flex items-center"
         >
-          + アイテムを追加
+          <Plus size={14} className="mr-1" /> アイテムを追加
         </button>
       )}
     </div>

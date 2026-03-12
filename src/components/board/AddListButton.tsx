@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { Plus, X } from "lucide-react";
 import { createList } from "@/actions/list.actions";
 import type { List } from "@/types/app.types";
 
@@ -39,7 +40,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
         }}
         className="flex-shrink-0 w-72 flex items-center gap-2 px-4 py-3 bg-white/60 hover:bg-white/80 rounded-xl text-slate-600 text-sm font-medium transition-colors border border-dashed border-slate-300"
       >
-        <span className="text-lg leading-none">+</span>
+        <Plus size={16} />
         リストを追加
       </button>
     );
@@ -79,7 +80,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
             }}
             className="px-3 py-1.5 text-slate-600 hover:bg-slate-200 text-sm rounded-lg transition-colors"
           >
-            ✕
+            <X size={14} />
           </button>
         </div>
       </form>

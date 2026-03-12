@@ -1,5 +1,6 @@
 "use client";
 
+import { Calendar, CalendarCheck, EyeOff } from "lucide-react";
 import { updateCard } from "@/actions/card.actions";
 import { cn, isOverdue, formatDate } from "@/lib/utils";
 
@@ -45,7 +46,9 @@ export default function CardDueDate({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-slate-700">📅 日程</h3>
+        <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+          <Calendar size={15} className="text-slate-500" /> 日程
+        </h3>
         {/* Calendar toggle */}
         <button
           onClick={handleToggleCalendar}
@@ -57,7 +60,7 @@ export default function CardDueDate({
           )}
           title="カレンダーへの表示をON/OFFする"
         >
-          <span>{showInCalendar ? "🗓️" : "🚫"}</span>
+          {showInCalendar ? <CalendarCheck size={12} /> : <EyeOff size={12} />}
           <span>カレンダー: {showInCalendar ? "表示" : "非表示"}</span>
         </button>
       </div>

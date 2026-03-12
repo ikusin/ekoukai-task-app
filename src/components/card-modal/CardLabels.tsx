@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
+import { Tag, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Label } from "@/types/app.types";
 
@@ -76,7 +77,7 @@ export default function CardLabels({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-2">🏷️ ラベル</h3>
+      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5"><Tag size={15} className="text-slate-500" /> ラベル</h3>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {active.map((label) => (
           <span
@@ -125,7 +126,7 @@ export default function CardLabels({
                       {label.name}
                     </span>
                     {isActive && (
-                      <span className="text-sky-500 text-xs">✓</span>
+                      <Check size={14} className="text-sky-500" />
                     )}
                   </button>
                 );
@@ -151,8 +152,8 @@ export default function CardLabels({
                     style={{ backgroundColor: c }}
                   >
                     {newColor === c && (
-                      <span className="flex items-center justify-center text-white text-xs">
-                        ✓
+                      <span className="flex items-center justify-center">
+                        <Check size={12} className="text-white" />
                       </span>
                     )}
                   </button>

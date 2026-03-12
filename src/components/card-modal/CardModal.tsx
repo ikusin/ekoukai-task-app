@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { X, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useCardModal } from "@/context/CardModalContext";
 import { deleteCard } from "@/actions/card.actions";
@@ -169,17 +170,18 @@ export default function CardModal() {
                       }
                     />
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <CardDuplicateButton cardId={card.id} />
                     <button
                       onClick={handleDeleteCard}
-                      className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="削除"
                     >
-                      削除
+                      <Trash2 size={16} />
                     </button>
                     <Dialog.Close asChild>
-                      <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                        ✕
+                      <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                        <X size={18} />
                       </button>
                     </Dialog.Close>
                   </div>

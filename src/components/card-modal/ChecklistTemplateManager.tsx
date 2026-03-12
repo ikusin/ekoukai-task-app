@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ClipboardList } from "lucide-react";
 import { deleteTemplate } from "@/actions/checklist.actions";
 import type { ChecklistTemplateWithItems } from "@/types/app.types";
 
@@ -28,8 +29,8 @@ export default function ChecklistTemplateManager({
   return (
     <div className="border border-slate-200 rounded-xl p-4 bg-slate-50">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-700">
-          📋 テンプレート管理
+        <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+          <ClipboardList size={15} className="text-slate-500" /> テンプレート管理
         </h3>
         <button
           onClick={onClose}
