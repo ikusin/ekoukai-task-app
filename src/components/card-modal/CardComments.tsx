@@ -75,9 +75,9 @@ export default function CardComments({ cardId, initialComments }: Props) {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="コメントを追加..."
-          rows={2}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+          placeholder="コメントを追加... (Enter で送信、Shift+Enter で改行)"
+          rows={4}
+          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y min-h-[96px]"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -85,13 +85,15 @@ export default function CardComments({ cardId, initialComments }: Props) {
             }
           }}
         />
-        <button
-          onClick={handleSubmit}
-          disabled={!text.trim() || submitting}
-          className="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300 text-white text-sm rounded-lg transition-colors"
-        >
-          送信
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={handleSubmit}
+            disabled={!text.trim() || submitting}
+            className="px-4 py-1.5 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300 text-white text-sm rounded-lg transition-colors"
+          >
+            {submitting ? "送信中..." : "送信"}
+          </button>
+        </div>
       </div>
     </div>
   );

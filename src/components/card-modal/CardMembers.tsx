@@ -118,17 +118,17 @@ export default function CardMembers({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-64 z-[100]"
+            className="bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-72 z-[100]"
             sideOffset={5}
           >
             <p className="text-sm font-semibold text-slate-700 mb-3">
               メンバー
             </p>
 
-            {/* Existing members */}
-            <div className="space-y-1 mb-3 max-h-40 overflow-y-auto">
+            {/* Existing members — 2 columns */}
+            <div className="grid grid-cols-2 gap-1 mb-3 max-h-48 overflow-y-auto">
               {members.length === 0 && (
-                <p className="text-xs text-slate-400 py-2">
+                <p className="text-xs text-slate-400 py-2 col-span-2">
                   まだメンバーがいません
                 </p>
               )}
@@ -137,11 +137,11 @@ export default function CardMembers({
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors group"
+                    className="relative flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors group"
                   >
                     <button
                       onClick={() => toggleMember(member)}
-                      className="flex items-center gap-2 flex-1 min-w-0"
+                      className="flex items-center gap-1.5 flex-1 min-w-0"
                     >
                       <span
                         className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -149,20 +149,20 @@ export default function CardMembers({
                       >
                         {getMemberInitials(member.name)}
                       </span>
-                      <span className="flex-1 text-sm text-left text-slate-700 truncate">
+                      <span className="flex-1 text-xs text-left text-slate-700 truncate">
                         {getMemberDisplayName(member.name)}
                       </span>
                       {isActive && (
-                        <Check size={14} className="text-sky-500 flex-shrink-0" />
+                        <Check size={12} className="text-sky-500 flex-shrink-0" />
                       )}
                     </button>
                     <button
                       onClick={(e) => handleDeleteMember(member, e)}
                       disabled={deletingId === member.id}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all flex-shrink-0 disabled:opacity-50"
+                      className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 p-0.5 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all disabled:opacity-50"
                       title="メンバーを削除"
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={11} />
                     </button>
                   </div>
                 );
