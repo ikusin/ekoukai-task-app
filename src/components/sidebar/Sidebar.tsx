@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import SidebarBoardItem from "./SidebarBoardItem";
 import CreateBoardModal from "./CreateBoardModal";
+import ImportBoardButton from "./ImportBoardButton";
 import type { Board } from "@/types/app.types";
 
 export default function Sidebar({ boards }: { boards: Board[] }) {
@@ -46,8 +47,9 @@ export default function Sidebar({ boards }: { boards: Board[] }) {
             <SidebarBoardItem key={board.id} board={board} />
           ))}
         </div>
-        <div className="mt-1">
+        <div className="mt-1 space-y-0.5">
           <CreateBoardModal />
+          <ImportBoardButton />
         </div>
       </div>
 

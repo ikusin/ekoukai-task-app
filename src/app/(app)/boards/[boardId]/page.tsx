@@ -76,6 +76,7 @@ export default async function BoardPage({ params }: Props) {
       <div className="flex-1 overflow-hidden">
         <BoardView
           boardId={params.boardId}
+          boardTitle={board.title}
           initialState={initialState}
           initialBackground={(board as unknown as { background_image: string | null }).background_image ?? null}
         />

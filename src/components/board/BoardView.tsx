@@ -20,6 +20,7 @@ import AddListButton from "./AddListButton";
 import CardItem from "./CardItem";
 import CalendarView from "./CalendarView";
 import BoardBackgroundPicker from "./BoardBackgroundPicker";
+import BoardExportButton from "./BoardExportButton";
 import { CardModalProvider } from "@/context/CardModalContext";
 import CardModal from "@/components/card-modal/CardModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
@@ -31,13 +32,24 @@ type CardUpdate = Partial<
 
 type Props = {
   boardId: string;
+  boardTitle: string;
   initialState: BoardState;
   initialBackground: string | null;
 };
 
-export default function BoardView({ boardId, initialState, initialBackground }: Props) {
+export default function BoardView({ boardId, boardTitle, initialState, initialBackground }: Props) {
   const [boardState, setBoardState] = useState<BoardState>(initialState);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  // Collapsed state: load from localStorage, persist on change
+  const storageKey = `collapsed-lists-${boardId}`;
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+    } catch {
+      return {};
+    }
+  });
   const [view, setView] = useState<"kanban" | "calendar">("kanban");
   const [background, setBackground] = useState<string | null>(initialBackground);
 
@@ -88,7 +100,11 @@ export default function BoardView({ boardId, initialState, initialBackground }: 
   }
 
   function handleToggleCollapse(listId: string) {
-    setCollapsed((prev) => ({ ...prev, [listId]: !prev[listId] }));
+    setCollapsed((prev) => {
+      const next = { ...prev, [listId]: !prev[listId] };
+      try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch {}
+      return next;
+    });
   }
 
   function handleCardUpdated(update: CardUpdate) {
@@ -113,12 +129,15 @@ export default function BoardView({ boardId, initialState, initialBackground }: 
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">
-          {/* Background picker */}
-          <BoardBackgroundPicker
-            boardId={boardId}
-            current={background}
-            onChange={setBackground}
-          />
+          {/* Left buttons */}
+          <div className="flex items-center gap-2">
+            <BoardBackgroundPicker
+              boardId={boardId}
+              current={background}
+              onChange={setBackground}
+            />
+            <BoardExportButton boardId={boardId} boardTitle={boardTitle} />
+          </div>
 
           {/* View toggle */}
           <div className="flex rounded-lg border border-slate-300 overflow-hidden text-sm">
