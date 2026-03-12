@@ -19,6 +19,7 @@ import ListColumn from "./ListColumn";
 import AddListButton from "./AddListButton";
 import CardItem from "./CardItem";
 import CalendarView from "./CalendarView";
+import GanttView from "./GanttView";
 import BoardBackgroundPicker from "./BoardBackgroundPicker";
 import BoardExportButton from "./BoardExportButton";
 import { CardModalProvider } from "@/context/CardModalContext";
@@ -50,7 +51,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
       return {};
     }
   });
-  const [view, setView] = useState<"kanban" | "calendar">("kanban");
+  const [view, setView] = useState<"kanban" | "calendar" | "gantt">("kanban");
   const [background, setBackground] = useState<string | null>(initialBackground);
 
   const sensors = useSensors(
@@ -178,6 +179,16 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
             >
               カレンダー
             </button>
+            <button
+              onClick={() => setView("gantt")}
+              className={`px-3 py-1.5 border-l border-slate-300 transition-colors ${
+                view === "gantt"
+                  ? "bg-sky-500 text-white"
+                  : "bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              ガント
+            </button>
           </div>
         </div>
 
@@ -233,9 +244,13 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                 ) : null}
               </DragOverlay>
             </DndContext>
-          ) : (
+          ) : view === "calendar" ? (
             <div style={bgStyle} className="h-full overflow-auto">
               <CalendarView boardState={boardState} />
+            </div>
+          ) : (
+            <div className="h-full bg-white">
+              <GanttView boardState={boardState} />
             </div>
           )}
         </div>
