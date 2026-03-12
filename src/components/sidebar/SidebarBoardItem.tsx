@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { updateBoard, deleteBoard } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
@@ -13,6 +15,22 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(board.title);
   const [showMenu, setShowMenu] = useState(false);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: board.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
 
   async function handleRename() {
     if (title.trim() === board.title || !title.trim()) {
@@ -32,7 +50,12 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
   }
 
   return (
-    <div className="relative group">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="relative group"
+    >
       {editing ? (
         <input
           type="text"
@@ -50,20 +73,31 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
           className="w-full px-3 py-2 text-sm bg-slate-800 border border-sky-500 rounded-lg text-white focus:outline-none"
         />
       ) : (
-        <Link
-          href={`/boards/${board.id}`}
-          className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-colors ${
-            isActive
-              ? "bg-white/10 text-white font-medium"
-              : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
-          }`}
-        >
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ backgroundColor: board.color }}
-          />
-          <span className="flex-1 truncate">{board.title}</span>
-        </Link>
+        <div className="flex items-center">
+          {/* Drag handle */}
+          <div
+            ref={setActivatorNodeRef}
+            {...listeners}
+            className="opacity-0 group-hover:opacity-100 pl-1.5 py-2 cursor-grab active:cursor-grabbing text-slate-600 hover:text-slate-400 flex-shrink-0 select-none transition-opacity"
+            title="ドラッグして並び替え"
+          >
+            ⠿
+          </div>
+          <Link
+            href={`/boards/${board.id}`}
+            className={`flex-1 flex items-center gap-2.5 px-2 py-2 text-sm rounded-lg transition-colors min-w-0 ${
+              isActive
+                ? "bg-white/10 text-white font-medium"
+                : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+            }`}
+          >
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: board.color }}
+            />
+            <span className="flex-1 truncate">{board.title}</span>
+          </Link>
+        </div>
       )}
 
       {/* Kebab menu */}

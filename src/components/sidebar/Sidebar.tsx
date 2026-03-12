@@ -3,21 +3,51 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
 import { createClient } from "@/lib/supabase/client";
 import SidebarBoardItem from "./SidebarBoardItem";
 import CreateBoardModal from "./CreateBoardModal";
 import ImportBoardButton from "./ImportBoardButton";
+import { reorderBoards } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
-export default function Sidebar({ boards }: { boards: Board[] }) {
+export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) {
   const router = useRouter();
+  const [boards, setBoards] = useState(initialBoards);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = boards.findIndex((b) => b.id === active.id);
+    const newIndex = boards.findIndex((b) => b.id === over.id);
+    const newBoards = arrayMove(boards, oldIndex, newIndex);
+    setBoards(newBoards);
+    reorderBoards(newBoards.map((b) => b.id));
   }
 
   const content = (
@@ -42,11 +72,22 @@ export default function Sidebar({ boards }: { boards: Board[] }) {
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">
           ボード
         </p>
-        <div className="space-y-0.5">
-          {boards.map((board) => (
-            <SidebarBoardItem key={board.id} board={board} />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={boards.map((b) => b.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-0.5">
+              {boards.map((board) => (
+                <SidebarBoardItem key={board.id} board={board} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
         <div className="mt-1 space-y-0.5">
           <CreateBoardModal />
           <ImportBoardButton />

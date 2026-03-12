@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useCardModal } from "@/context/CardModalContext";
 import { deleteCard } from "@/actions/card.actions";
 import { getTemplates } from "@/actions/checklist.actions";
+import CardDuplicateButton from "./CardDuplicateButton";
 import CardTitle from "./CardTitle";
 import CardDescription from "./CardDescription";
 import CardDueDate from "./CardDueDate";
@@ -168,6 +169,7 @@ export default function CardModal() {
                     />
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <CardDuplicateButton cardId={card.id} />
                     <button
                       onClick={handleDeleteCard}
                       className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"

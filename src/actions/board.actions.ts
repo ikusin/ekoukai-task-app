@@ -110,6 +110,26 @@ export async function updateBoardBackground(
   return { success: true };
 }
 
+export async function reorderBoards(orderedIds: string[]) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  for (let i = 0; i < orderedIds.length; i++) {
+    await supabase
+      .from("boards")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update({ order: i } as any)
+      .eq("id", orderedIds[i])
+      .eq("user_id", user.id);
+  }
+
+  revalidatePath("/boards", "layout");
+  return { success: true };
+}
+
 export async function deleteBoard(id: string) {
   const supabase = createClient();
   const {
