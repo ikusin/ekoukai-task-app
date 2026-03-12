@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -27,6 +27,11 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
   const router = useRouter();
   const [boards, setBoards] = useState(initialBoards);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Sync when server re-fetches (after router.refresh())
+  useEffect(() => {
+    setBoards(initialBoards);
+  }, [initialBoards]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
