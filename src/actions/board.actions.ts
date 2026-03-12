@@ -89,6 +89,27 @@ export async function updateBoard(input: {
   return { data: data as unknown as Board };
 }
 
+export async function updateBoardBackground(
+  id: string,
+  background: string | null
+) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("boards")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .update({ background_image: background } as any)
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
 export async function deleteBoard(id: string) {
   const supabase = createClient();
   const {

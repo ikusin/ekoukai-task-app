@@ -17,7 +17,7 @@ export default async function BoardPage({ params }: Props) {
   // Verify board ownership
   const { data: board } = await supabase
     .from("boards")
-    .select("id, title, color")
+    .select("id, title, color, background_image")
     .eq("id", params.boardId)
     .eq("user_id", user.id)
     .single();
@@ -74,7 +74,11 @@ export default async function BoardPage({ params }: Props) {
 
       {/* Board content */}
       <div className="flex-1 overflow-hidden">
-        <BoardView boardId={params.boardId} initialState={initialState} />
+        <BoardView
+          boardId={params.boardId}
+          initialState={initialState}
+          initialBackground={(board as unknown as { background_image: string | null }).background_image ?? null}
+        />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import ListColumn from "./ListColumn";
 import AddListButton from "./AddListButton";
 import CardItem from "./CardItem";
 import CalendarView from "./CalendarView";
+import BoardBackgroundPicker from "./BoardBackgroundPicker";
 import { CardModalProvider } from "@/context/CardModalContext";
 import CardModal from "@/components/card-modal/CardModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
@@ -31,12 +32,14 @@ type CardUpdate = Partial<
 type Props = {
   boardId: string;
   initialState: BoardState;
+  initialBackground: string | null;
 };
 
-export default function BoardView({ boardId, initialState }: Props) {
+export default function BoardView({ boardId, initialState, initialBackground }: Props) {
   const [boardState, setBoardState] = useState<BoardState>(initialState);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [view, setView] = useState<"kanban" | "calendar">("kanban");
+  const [background, setBackground] = useState<string | null>(initialBackground);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -100,11 +103,24 @@ export default function BoardView({ boardId, initialState }: Props) {
     }));
   }
 
+  // Build background style for the kanban/calendar area
+  const bgStyle: React.CSSProperties = background
+    ? { background, backgroundSize: "cover", backgroundPosition: "center" }
+    : { backgroundColor: "rgb(226 232 240 / 0.6)" };
+
   return (
     <CardModalProvider onCardUpdated={handleCardUpdated}>
       <div className="flex flex-col h-full">
-        {/* View toggle toolbar */}
-        <div className="flex items-center justify-end px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">
+          {/* Background picker */}
+          <BoardBackgroundPicker
+            boardId={boardId}
+            current={background}
+            onChange={setBackground}
+          />
+
+          {/* View toggle */}
           <div className="flex rounded-lg border border-slate-300 overflow-hidden text-sm">
             <button
               onClick={() => setView("kanban")}
@@ -143,7 +159,10 @@ export default function BoardView({ boardId, initialState }: Props) {
                 items={boardState.lists.map((l) => l.id)}
                 strategy={horizontalListSortingStrategy}
               >
-                <div className="flex gap-4 p-4 h-full overflow-x-auto kanban-scroll items-start bg-slate-200/60">
+                <div
+                  className="flex gap-4 p-4 h-full overflow-x-auto kanban-scroll items-start"
+                  style={bgStyle}
+                >
                   {boardState.lists.map((list) => (
                     <ListColumn
                       key={list.id}
@@ -179,7 +198,9 @@ export default function BoardView({ boardId, initialState }: Props) {
               </DragOverlay>
             </DndContext>
           ) : (
-            <CalendarView boardState={boardState} />
+            <div style={bgStyle} className="h-full overflow-auto">
+              <CalendarView boardState={boardState} />
+            </div>
           )}
         </div>
       </div>
