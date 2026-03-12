@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -28,6 +28,7 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
   const router = useRouter();
   const [boards, setBoards] = useState(initialBoards);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   // Sync when server re-fetches (after router.refresh())
   useEffect(() => {
@@ -57,10 +58,10 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
   }
 
   const content = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Header */}
-      <div className="px-4 py-5 flex-shrink-0">
-        <Link href="/boards" className="flex items-center gap-3">
+      <div className="px-4 py-5 flex-shrink-0 flex items-center justify-between">
+        <Link href="/boards" className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
             恵
           </div>
@@ -69,6 +70,14 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
             <div className="text-xs text-slate-500 leading-tight">タスク管理</div>
           </div>
         </Link>
+        {/* Desktop collapse button */}
+        <button
+          onClick={() => setCollapsed(true)}
+          className="hidden md:flex items-center justify-center w-6 h-6 rounded text-slate-500 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+          title="サイドバーを閉じる"
+        >
+          <ChevronLeft size={16} />
+        </button>
       </div>
 
       <div className="h-px bg-slate-800 mx-3 flex-shrink-0" />
@@ -133,12 +142,24 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
         />
       )}
 
+      {/* Desktop expand tab (shown when collapsed) */}
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 items-center justify-center w-5 h-12 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-r-lg shadow-md transition-colors"
+          title="サイドバーを開く"
+        >
+          <ChevronRight size={14} />
+        </button>
+      )}
+
       {/* Sidebar */}
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-50
-          w-60 bg-slate-900 flex-shrink-0
-          transform transition-transform duration-200
+          fixed md:relative inset-y-0 left-0 z-50
+          bg-slate-900 flex-shrink-0
+          transition-all duration-200 ease-in-out overflow-hidden
+          ${collapsed ? "md:w-0" : "w-60"}
           ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
