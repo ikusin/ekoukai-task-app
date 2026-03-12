@@ -76,11 +76,6 @@ export default function GanttView({ boardState }: Props) {
     setCollapsedLists((prev) => ({ ...prev, [listId]: !prev[listId] }));
   }
 
-  const totalUnscheduled = boardState.lists.reduce((acc, list) => {
-    return acc + (boardState.cardsByList[list.id] ?? []).filter(
-      (c) => !c.start_date && !c.due_date
-    ).length;
-  }, 0);
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -117,11 +112,6 @@ export default function GanttView({ boardState }: Props) {
           〜
           {days[VIEW_DAYS - 1].getFullYear()}年{days[VIEW_DAYS - 1].getMonth() + 1}月{days[VIEW_DAYS - 1].getDate()}日
         </span>
-        {totalUnscheduled > 0 && (
-          <span className="ml-auto text-xs text-slate-400">
-            期日未設定 {totalUnscheduled}件は非表示
-          </span>
-        )}
       </div>
 
       {/* Scrollable grid */}
@@ -213,7 +203,7 @@ export default function GanttView({ boardState }: Props) {
                       {list.title}
                     </span>
                     <span className="text-xs text-slate-400 flex-shrink-0">
-                      {scheduled.length}/{allCards.length}
+                      {scheduled.length}/{allCards.length}件
                     </span>
                   </div>
                   {/* Grid background for list header */}
@@ -231,21 +221,22 @@ export default function GanttView({ boardState }: Props) {
                 </div>
 
                 {/* Card rows — hidden when collapsed */}
-                {!isCollapsed && scheduled.map((card) => {
+                {!isCollapsed && allCards.map((card) => {
                   const bar = getBar(card);
+                  const unscheduled = !card.start_date && !card.due_date;
                   return (
                     <div
                       key={card.id}
-                      className="flex border-b border-slate-100 hover:bg-slate-50/70 group"
+                      className={`flex border-b border-slate-100 group ${unscheduled ? "bg-slate-50/40 hover:bg-slate-50/80" : "hover:bg-slate-50/70"}`}
                       style={{ height: ROW_H }}
                     >
                       {/* Card title */}
                       <div
-                        className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/70 border-r border-slate-200 flex-shrink-0 flex items-center px-3 cursor-pointer pl-8"
+                        className={`sticky left-0 z-10 border-r border-slate-200 flex-shrink-0 flex items-center px-3 cursor-pointer pl-8 ${unscheduled ? "bg-slate-50/40 group-hover:bg-slate-50/80" : "bg-white group-hover:bg-slate-50/70"}`}
                         style={{ width: LEFT_W }}
                         onClick={() => openCard(card.id)}
                       >
-                        <span className="text-xs text-slate-600 truncate hover:text-sky-600 transition-colors">
+                        <span className={`text-xs truncate hover:text-sky-600 transition-colors ${unscheduled ? "text-slate-400 italic" : "text-slate-600"}`}>
                           {card.title}
                         </span>
                       </div>
@@ -280,7 +271,7 @@ export default function GanttView({ boardState }: Props) {
                         )}
 
                         {/* Gantt bar */}
-                        {bar && (
+                        {bar ? (
                           <div
                             className="absolute rounded cursor-pointer flex items-center px-2 text-white text-xs font-medium overflow-hidden hover:brightness-110 transition-all shadow-sm"
                             style={{
@@ -297,6 +288,19 @@ export default function GanttView({ boardState }: Props) {
                             {bar.width >= 44 && (
                               <span className="truncate drop-shadow-sm">{card.title}</span>
                             )}
+                          </div>
+                        ) : (
+                          /* 期日未設定：横いっぱいに薄い破線 */
+                          <div
+                            className="absolute inset-y-0 flex items-center px-2 cursor-pointer"
+                            style={{ left: 4, right: 4 }}
+                            onClick={() => openCard(card.id)}
+                            title="期日未設定 — クリックして設定"
+                          >
+                            <div
+                              className="w-full h-px"
+                              style={{ borderTop: `1.5px dashed ${listColor}40` }}
+                            />
                           </div>
                         )}
                       </div>
