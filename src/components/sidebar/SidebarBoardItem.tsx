@@ -9,12 +9,18 @@ import * as Popover from "@radix-ui/react-popover";
 import { updateBoard, deleteBoard, copyBoard } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
+const BOARD_COLORS = [
+  "#0ea5e9", "#6366f1", "#8b5cf6", "#ec4899", "#ef4444",
+  "#f97316", "#eab308", "#22c55e", "#14b8a6", "#64748b",
+];
+
 export default function SidebarBoardItem({ board }: { board: Board }) {
   const pathname = usePathname();
   const router = useRouter();
   const isActive = pathname === `/boards/${board.id}`;
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(board.title);
+  const [color, setColor] = useState(board.color);
   const [open, setOpen] = useState(false);
   const [copying, setCopying] = useState(false);
 
@@ -57,6 +63,13 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
       router.push(`/boards/${result.data.id}`);
       router.refresh();
     }
+  }
+
+  async function handleColorChange(newColor: string) {
+    setColor(newColor);
+    setOpen(false);
+    await updateBoard({ id: board.id, color: newColor });
+    router.refresh();
   }
 
   async function handleDelete() {
@@ -117,7 +130,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
           >
             <span
               className="w-2 h-2 rounded-full flex-shrink-0"
-              style={{ backgroundColor: board.color }}
+              style={{ backgroundColor: color }}
             />
             <span className="flex-1 truncate">{board.title}</span>
           </Link>
@@ -146,7 +159,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
                 side="bottom"
                 align="end"
                 sideOffset={4}
-                className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-[300] min-w-[130px]"
+                className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-[300] min-w-[160px]"
               >
                 <button
                   onClick={() => {
@@ -163,6 +176,21 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
                 >
                   コピーを作成
                 </button>
+                {/* Color picker */}
+                <div className="px-3 py-2">
+                  <p className="text-xs text-slate-500 mb-1.5">色を変更</p>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {BOARD_COLORS.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => handleColorChange(c)}
+                        className="w-6 h-6 rounded-full transition-transform hover:scale-110 focus:outline-none"
+                        style={{ backgroundColor: c, boxShadow: color === c ? `0 0 0 2px #fff, 0 0 0 3px ${c}` : undefined }}
+                        title={c}
+                      />
+                    ))}
+                  </div>
+                </div>
                 <div className="h-px bg-slate-700 my-1" />
                 <button
                   onClick={handleDelete}

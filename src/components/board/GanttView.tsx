@@ -6,7 +6,7 @@ import type { BoardState, CardWithLabels } from "@/types/app.types";
 
 const DAY_W = 40;   // px per day column
 const LEFT_W = 220; // px for the left label panel
-const ROW_H = 36;   // px per row
+const ROW_H = 38;   // px per row
 const HDR_H = 52;   // px for date header
 const VIEW_DAYS = 42; // 6 weeks
 
@@ -32,6 +32,7 @@ export default function GanttView({ boardState }: Props) {
   const { openCard } = useCardModal();
   const today = startOfDay(new Date());
   const [offset, setOffset] = useState(-14); // days from today to view start
+  const [collapsedLists, setCollapsedLists] = useState<Record<string, boolean>>({});
 
   const viewStart = startOfDay(new Date(today));
   viewStart.setDate(today.getDate() + offset);
@@ -69,6 +70,10 @@ export default function GanttView({ boardState }: Props) {
     if (vs > ve) return null;
     const overdue = !!e && e < today;
     return { left: vs * DAY_W + 2, width: (ve - vs + 1) * DAY_W - 4, overdue };
+  }
+
+  function toggleList(listId: string) {
+    setCollapsedLists((prev) => ({ ...prev, [listId]: !prev[listId] }));
   }
 
   const totalUnscheduled = boardState.lists.reduce((acc, list) => {
@@ -182,18 +187,24 @@ export default function GanttView({ boardState }: Props) {
             const allCards = boardState.cardsByList[list.id] ?? [];
             const scheduled = allCards.filter((c) => c.start_date || c.due_date);
             const listColor = list.color ?? "#94a3b8";
+            const isCollapsed = !!collapsedLists[list.id];
 
             return (
               <div key={list.id}>
                 {/* List header row */}
                 <div
-                  className="flex border-b border-slate-200 bg-slate-50"
+                  className="flex border-b border-slate-300 bg-slate-100 cursor-pointer select-none hover:bg-slate-200/70 transition-colors"
                   style={{ height: ROW_H }}
+                  onClick={() => toggleList(list.id)}
                 >
                   <div
-                    className="sticky left-0 z-10 bg-slate-50 border-r border-slate-200 flex-shrink-0 flex items-center gap-2 px-3"
+                    className="sticky left-0 z-10 bg-slate-100 hover:bg-slate-200/70 border-r border-slate-300 flex-shrink-0 flex items-center gap-2 px-3"
                     style={{ width: LEFT_W }}
                   >
+                    {/* Collapse chevron */}
+                    <span className="text-slate-400 text-xs w-3 flex-shrink-0 transition-transform" style={{ display: "inline-block", transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}>
+                      ▾
+                    </span>
                     <span
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: listColor }}
@@ -212,29 +223,29 @@ export default function GanttView({ boardState }: Props) {
                   >
                     {todayCol >= 0 && todayCol < VIEW_DAYS && (
                       <div
-                        className="absolute inset-y-0 bg-sky-50/50"
+                        className="absolute inset-y-0 bg-sky-100/40"
                         style={{ left: todayCol * DAY_W, width: DAY_W }}
                       />
                     )}
                   </div>
                 </div>
 
-                {/* Card rows */}
-                {scheduled.map((card) => {
+                {/* Card rows — hidden when collapsed */}
+                {!isCollapsed && scheduled.map((card) => {
                   const bar = getBar(card);
                   return (
                     <div
                       key={card.id}
-                      className="flex border-b border-slate-100 hover:bg-slate-50/60 group"
+                      className="flex border-b border-slate-100 hover:bg-slate-50/70 group"
                       style={{ height: ROW_H }}
                     >
                       {/* Card title */}
                       <div
-                        className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/60 border-r border-slate-200 flex-shrink-0 flex items-center px-3 cursor-pointer"
+                        className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/70 border-r border-slate-200 flex-shrink-0 flex items-center px-3 cursor-pointer pl-8"
                         style={{ width: LEFT_W }}
                         onClick={() => openCard(card.id)}
                       >
-                        <span className="text-xs text-slate-700 truncate hover:text-sky-600 transition-colors">
+                        <span className="text-xs text-slate-600 truncate hover:text-sky-600 transition-colors">
                           {card.title}
                         </span>
                       </div>
@@ -263,7 +274,7 @@ export default function GanttView({ boardState }: Props) {
                         {/* Today vertical line */}
                         {todayCol >= 0 && todayCol < VIEW_DAYS && (
                           <div
-                            className="absolute inset-y-0 w-px bg-sky-400/40"
+                            className="absolute inset-y-0 w-px bg-sky-400/50"
                             style={{ left: todayCol * DAY_W + DAY_W / 2 }}
                           />
                         )}
@@ -271,21 +282,20 @@ export default function GanttView({ boardState }: Props) {
                         {/* Gantt bar */}
                         {bar && (
                           <div
-                            className="absolute rounded-md cursor-pointer flex items-center px-1.5 text-white text-xs font-medium overflow-hidden hover:brightness-110 transition-all shadow-sm"
+                            className="absolute rounded cursor-pointer flex items-center px-2 text-white text-xs font-medium overflow-hidden hover:brightness-110 transition-all shadow-sm"
                             style={{
                               left: bar.left,
-                              width: Math.max(bar.width, 6),
+                              width: Math.max(bar.width, 8),
                               top: "50%",
                               transform: "translateY(-50%)",
-                              height: 22,
+                              height: 24,
                               backgroundColor: bar.overdue ? "#f87171" : listColor,
-                              opacity: 0.9,
                             }}
                             onClick={() => openCard(card.id)}
                             title={`${card.title}${card.start_date ? `\n開始: ${card.start_date}` : ""}${card.due_date ? `\n期日: ${card.due_date}` : ""}`}
                           >
                             {bar.width >= 44 && (
-                              <span className="truncate drop-shadow">{card.title}</span>
+                              <span className="truncate drop-shadow-sm">{card.title}</span>
                             )}
                           </div>
                         )}
