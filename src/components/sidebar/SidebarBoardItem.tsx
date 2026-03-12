@@ -127,6 +127,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
       {/* Kebab menu using Radix Popover (portal) */}
       {!editing && (
         <div
+          onPointerDown={(e) => e.stopPropagation()}
           className={`absolute right-1 top-1/2 -translate-y-1/2 transition-opacity ${
             open ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
@@ -134,7 +135,6 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
           <Popover.Root open={open} onOpenChange={setOpen}>
             <Popover.Trigger asChild>
               <button
-                onClick={(e) => e.preventDefault()}
                 className="p-1.5 text-slate-500 hover:text-slate-300 rounded transition-colors"
                 title="メニュー"
               >
