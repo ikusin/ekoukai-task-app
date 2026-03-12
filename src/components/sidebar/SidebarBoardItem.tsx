@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import * as Popover from "@radix-ui/react-popover";
 import { updateBoard, deleteBoard, copyBoard } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
@@ -14,7 +15,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
   const isActive = pathname === `/boards/${board.id}`;
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(board.title);
-  const [showMenu, setShowMenu] = useState(false);
+  const [open, setOpen] = useState(false);
   const [copying, setCopying] = useState(false);
 
   const {
@@ -44,7 +45,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
   }
 
   async function handleCopy() {
-    setShowMenu(false);
+    setOpen(false);
     setCopying(true);
     const result = await copyBoard(board.id);
     setCopying(false);
@@ -59,7 +60,7 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
   }
 
   async function handleDelete() {
-    setShowMenu(false);
+    setOpen(false);
     if (!confirm(`「${board.title}」を削除しますか？`)) return;
     await deleteBoard(board.id);
     if (isActive) router.push("/boards");
@@ -123,36 +124,34 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
         </div>
       )}
 
-      {/* Kebab menu — always visible when open, hover-visible otherwise */}
+      {/* Kebab menu using Radix Popover (portal) */}
       {!editing && (
         <div
           className={`absolute right-1 top-1/2 -translate-y-1/2 transition-opacity ${
-            showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            open ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
         >
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setShowMenu((v) => !v);
-            }}
-            className="p-1.5 text-slate-500 hover:text-slate-300 rounded transition-colors"
-            title="メニュー"
-          >
-            ⋯
-          </button>
-
-          {showMenu && (
-            <>
-              {/* Click-away backdrop */}
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowMenu(false)}
-              />
-              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-20 min-w-[130px]">
+          <Popover.Root open={open} onOpenChange={setOpen}>
+            <Popover.Trigger asChild>
+              <button
+                onClick={(e) => e.preventDefault()}
+                className="p-1.5 text-slate-500 hover:text-slate-300 rounded transition-colors"
+                title="メニュー"
+              >
+                ⋯
+              </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                side="bottom"
+                align="end"
+                sideOffset={4}
+                className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 z-[300] min-w-[130px]"
+              >
                 <button
                   onClick={() => {
-                    setShowMenu(false);
-                    setEditing(true);
+                    setOpen(false);
+                    setTimeout(() => setEditing(true), 50);
                   }}
                   className="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
                 >
@@ -171,9 +170,9 @@ export default function SidebarBoardItem({ board }: { board: Board }) {
                 >
                   削除
                 </button>
-              </div>
-            </>
-          )}
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useCardModal } from "@/context/CardModalContext";
+import { deleteCard } from "@/actions/card.actions";
 import { cn, formatDate, isOverdue } from "@/lib/utils";
 import type { CardWithLabels } from "@/types/app.types";
 
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export default function CardItem({ card, isOverlay = false }: Props) {
-  const { openCard } = useCardModal();
+  const { openCard, notifyCardDeleted } = useCardModal();
   const {
     attributes,
     listeners,
@@ -54,6 +55,13 @@ export default function CardItem({ card, isOverlay = false }: Props) {
   const hasMembers = card.card_members.length > 0;
   const hasFooter = hasDueDate || hasChecklist || hasMembers;
 
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`「${card.title}」を削除しますか？`)) return;
+    notifyCardDeleted(card.id);
+    await deleteCard(card.id);
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -67,12 +75,24 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         }
       }}
       className={cn(
-        "bg-white rounded-xl p-3 border border-slate-200/80 cursor-grab active:cursor-grabbing",
+        "relative group bg-white rounded-xl p-3 border border-slate-200/80 cursor-grab active:cursor-grabbing",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150",
         isOverlay && "rotate-1 shadow-xl cursor-grabbing",
         isDragging && "border-sky-300"
       )}
     >
+      {/* Delete button — appears on hover */}
+      {!isOverlay && (
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={handleDelete}
+          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-slate-100 hover:bg-red-500 text-slate-400 hover:text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 z-10 shadow-sm"
+          title="カードを削除"
+        >
+          ✕
+        </button>
+      )}
+
       {/* Label bars */}
       {card.card_labels.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2.5">
@@ -87,7 +107,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         </div>
       )}
 
-      <p className="text-sm text-slate-800 leading-snug">{card.title}</p>
+      <p className="text-sm text-slate-800 leading-snug pr-4">{card.title}</p>
 
       {/* Metadata footer */}
       {hasFooter && (
