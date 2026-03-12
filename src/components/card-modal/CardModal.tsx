@@ -26,7 +26,7 @@ import type {
 } from "@/types/app.types";
 
 export default function CardModal() {
-  const { activeCardId, closeCard, notifyCardChange } = useCardModal();
+  const { activeCardId, closeCard, notifyCardChange, notifyCardDeleted } = useCardModal();
   const [card, setCard] = useState<CardWithDetails | null>(null);
   const [boardLabels, setBoardLabels] = useState<Label[]>([]);
   const [boardMembers, setBoardMembers] = useState<Member[]>([]);
@@ -129,8 +129,9 @@ export default function CardModal() {
   async function handleDeleteCard() {
     if (!card) return;
     if (!confirm(`「${card.title}」を削除しますか？`)) return;
-    await deleteCard(card.id);
+    notifyCardDeleted(card.id);
     closeCard();
+    await deleteCard(card.id);
   }
 
   function handleChecklistCreated(checklist: ChecklistWithItems) {

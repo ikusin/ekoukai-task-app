@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -62,6 +62,11 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
     })
   );
 
+  // Sync boardState when server re-fetches (e.g. after router.refresh())
+  useEffect(() => {
+    setBoardState(initialState);
+  }, [initialState]);
+
   const { activeCard, activeList, handleDragStart, handleDragOver, handleDragEnd } =
     useDragAndDrop(boardState, setBoardState, boardId);
 
@@ -119,13 +124,25 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
     }));
   }
 
+  function handleCardDeleted(cardId: string) {
+    setBoardState((prev) => ({
+      ...prev,
+      cardsByList: Object.fromEntries(
+        Object.entries(prev.cardsByList).map(([listId, cards]) => [
+          listId,
+          cards.filter((c) => c.id !== cardId),
+        ])
+      ),
+    }));
+  }
+
   // Build background style for the kanban/calendar area
   const bgStyle: React.CSSProperties = background
     ? { background, backgroundSize: "cover", backgroundPosition: "center" }
     : { backgroundColor: "rgb(226 232 240 / 0.6)" };
 
   return (
-    <CardModalProvider onCardUpdated={handleCardUpdated}>
+    <CardModalProvider onCardUpdated={handleCardUpdated} onCardDeleted={handleCardDeleted}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">

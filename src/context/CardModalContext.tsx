@@ -12,6 +12,7 @@ type CardModalContextType = {
   openCard: (cardId: string) => void;
   closeCard: () => void;
   notifyCardChange: (update: CardUpdate) => void;
+  notifyCardDeleted: (cardId: string) => void;
 };
 
 const CardModalContext = createContext<CardModalContextType | null>(null);
@@ -19,9 +20,10 @@ const CardModalContext = createContext<CardModalContextType | null>(null);
 type Props = {
   children: React.ReactNode;
   onCardUpdated?: (update: CardUpdate) => void;
+  onCardDeleted?: (cardId: string) => void;
 };
 
-export function CardModalProvider({ children, onCardUpdated }: Props) {
+export function CardModalProvider({ children, onCardUpdated, onCardDeleted }: Props) {
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
   const notifyCardChange = useCallback(
@@ -31,6 +33,13 @@ export function CardModalProvider({ children, onCardUpdated }: Props) {
     [onCardUpdated]
   );
 
+  const notifyCardDeleted = useCallback(
+    (cardId: string) => {
+      onCardDeleted?.(cardId);
+    },
+    [onCardDeleted]
+  );
+
   return (
     <CardModalContext.Provider
       value={{
@@ -38,6 +47,7 @@ export function CardModalProvider({ children, onCardUpdated }: Props) {
         openCard: (id) => setActiveCardId(id),
         closeCard: () => setActiveCardId(null),
         notifyCardChange,
+        notifyCardDeleted,
       }}
     >
       {children}
