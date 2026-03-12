@@ -5,17 +5,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { Calendar, CheckSquare, X } from "lucide-react";
 import { useCardModal } from "@/context/CardModalContext";
 import { deleteCard } from "@/actions/card.actions";
-import { cn, formatDate, isOverdue } from "@/lib/utils";
+import { cn, formatDate, isOverdue, getMemberInitials } from "@/lib/utils";
 import type { CardWithLabels } from "@/types/app.types";
-
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 type Props = {
   card: CardWithLabels;
@@ -150,7 +141,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
                   style={{ backgroundColor: members.color }}
                   title={members.name}
                 >
-                  {getInitials(members.name)}
+                  {getMemberInitials(members.name)}
                 </span>
               ))}
             </div>

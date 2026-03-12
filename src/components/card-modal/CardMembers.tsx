@@ -5,6 +5,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Users, Check, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createMember, deleteMember } from "@/actions/member.actions";
+import { getMemberInitials, getMemberDisplayName } from "@/lib/utils";
 import type { Member } from "@/types/app.types";
 
 const MEMBER_COLORS = [
@@ -17,15 +18,6 @@ const MEMBER_COLORS = [
   "#8b5cf6", // violet
   "#14b8a6", // teal
 ];
-
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 type Props = {
   cardId: string;
@@ -110,7 +102,7 @@ export default function CardMembers({
             className="flex items-center gap-1.5 px-2 py-1 rounded-full text-white text-xs font-medium"
             style={{ backgroundColor: member.color }}
           >
-            <span>{member.name}</span>
+            <span>{getMemberDisplayName(member.name)}</span>
           </div>
         ))}
         {active.length === 0 && (
@@ -155,10 +147,10 @@ export default function CardMembers({
                         className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                         style={{ backgroundColor: member.color }}
                       >
-                        {getInitials(member.name)}
+                        {getMemberInitials(member.name)}
                       </span>
                       <span className="flex-1 text-sm text-left text-slate-700 truncate">
-                        {member.name}
+                        {getMemberDisplayName(member.name)}
                       </span>
                       {isActive && (
                         <Check size={14} className="text-sky-500 flex-shrink-0" />
@@ -187,9 +179,12 @@ export default function CardMembers({
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateMember()}
-                placeholder="名前"
-                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-2"
+                placeholder="名前（例: 宮田&quot;田&quot;）"
+                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-1"
               />
+              <p className="text-xs text-slate-400 mb-2">
+                アイコン文字を指定: <span className="font-mono">宮田&quot;田&quot;</span> → アイコンに「田」
+              </p>
               <div className="flex flex-wrap gap-1 mb-2">
                 {MEMBER_COLORS.map((c) => (
                   <button
