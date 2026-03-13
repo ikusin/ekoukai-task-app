@@ -63,9 +63,14 @@ export default function ListColumn({
   if (collapsed) {
     return (
       <div
-        ref={setSortableRef}
+        ref={(el) => {
+          setSortableRef(el);
+          setDroppableRef(el);
+        }}
         style={{ ...sortableStyle, backgroundColor: accentColor }}
-        className="flex-shrink-0 w-10 flex flex-col items-center rounded-xl py-3 gap-2 border border-black/10 shadow-sm"
+        className={`flex-shrink-0 w-10 flex flex-col items-center rounded-xl py-3 gap-2 border border-black/10 shadow-sm transition-all ${
+          isOver ? "ring-2 ring-sky-400 brightness-95" : ""
+        }`}
       >
         <button
           onClick={() => onToggleCollapse(list.id)}
