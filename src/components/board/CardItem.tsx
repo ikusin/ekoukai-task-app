@@ -14,7 +14,7 @@ type Props = {
 };
 
 export default function CardItem({ card, isOverlay = false }: Props) {
-  const { openCard, notifyCardDeleted } = useCardModal();
+  const { openCard, prefetchCard, notifyCardDeleted } = useCardModal();
   const {
     attributes,
     listeners,
@@ -60,6 +60,9 @@ export default function CardItem({ card, isOverlay = false }: Props) {
       style={isOverlay ? undefined : style}
       {...attributes}
       {...listeners}
+      onMouseEnter={() => {
+        if (!isOverlay) prefetchCard(card.id);
+      }}
       onClick={(e) => {
         if (!isDragging) {
           e.stopPropagation();

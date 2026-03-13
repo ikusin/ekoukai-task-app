@@ -143,7 +143,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
     : { backgroundColor: "rgb(226 232 240 / 0.6)" };
 
   return (
-    <CardModalProvider onCardUpdated={handleCardUpdated} onCardDeleted={handleCardDeleted}>
+    <CardModalProvider boardId={boardId} onCardUpdated={handleCardUpdated} onCardDeleted={handleCardDeleted}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-3 md:px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">

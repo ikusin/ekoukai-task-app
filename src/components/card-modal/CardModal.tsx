@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, Trash2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { useCardModal } from "@/context/CardModalContext";
 import { deleteCard } from "@/actions/card.actions";
-import { getTemplates } from "@/actions/checklist.actions";
 import CardDuplicateButton from "./CardDuplicateButton";
 import CardTitle from "./CardTitle";
 import CardDescription from "./CardDescription";
@@ -27,105 +25,40 @@ import type {
 } from "@/types/app.types";
 
 export default function CardModal() {
-  const { activeCardId, closeCard, notifyCardChange, notifyCardDeleted } = useCardModal();
+  const {
+    boardId,
+    activeCardId,
+    activeCardData,
+    loading,
+    closeCard,
+    notifyCardChange,
+    notifyCardDeleted,
+  } = useCardModal();
+
   const [card, setCard] = useState<CardWithDetails | null>(null);
   const [boardLabels, setBoardLabels] = useState<Label[]>([]);
   const [boardMembers, setBoardMembers] = useState<Member[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [templates, setTemplates] = useState<ChecklistTemplateWithItems[]>([]);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [boardId, setBoardId] = useState<string | undefined>();
 
+  // Initialize local state from context cache whenever the active card data changes
   useEffect(() => {
-    if (!activeCardId) {
+    if (!activeCardData) {
       setCard(null);
-      setBoardId(undefined);
+      setBoardLabels([]);
+      setBoardMembers([]);
       setComments([]);
+      setTemplates([]);
       setShowTemplateManager(false);
       return;
     }
-
-    setLoading(true);
-    const supabase = createClient();
-
-    async function fetchCard() {
-      const { data } = await supabase
-        .from("cards")
-        .select(
-          `
-          *,
-          card_labels ( label_id, labels ( id, board_id, name, color ) ),
-          card_members ( member_id, members ( id, board_id, name, color ) ),
-          checklists (
-            id, card_id, title,
-            checklist_items ( id, checklist_id, text, is_done, order, due_date, assignee_id )
-          )
-        `
-        )
-        .eq("id", activeCardId!)
-        .single();
-
-      if (data) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawData = data as any;
-        const normalized: CardWithDetails = {
-          ...rawData,
-          card_labels: (rawData.card_labels ?? []).map(
-            (cl: { label_id: string; labels: Label | Label[] }) => ({
-              label_id: cl.label_id,
-              labels: Array.isArray(cl.labels) ? cl.labels[0] : cl.labels,
-            })
-          ),
-          card_members: (rawData.card_members ?? []).map(
-            (cm: { member_id: string; members: Member | Member[] }) => ({
-              member_id: cm.member_id,
-              members: Array.isArray(cm.members) ? cm.members[0] : cm.members,
-            })
-          ),
-          checklists: (rawData.checklists ?? []).map(
-            (c: ChecklistWithItems) => ({
-              ...c,
-              checklist_items: c.checklist_items ?? [],
-            })
-          ),
-        };
-        setCard(normalized);
-
-        // Fetch board labels, members, comments, and templates
-        const listData = await supabase
-          .from("lists")
-          .select("board_id")
-          .eq("id", data.list_id)
-          .single();
-
-        if (listData.data) {
-          const bId = (listData.data as { board_id: string }).board_id;
-          setBoardId(bId);
-
-          const [labelsData, membersData, commentsData] = await Promise.all([
-            supabase.from("labels").select("*").eq("board_id", bId),
-            supabase.from("members").select("*").eq("board_id", bId),
-            supabase
-              .from("card_comments")
-              .select("*")
-              .eq("card_id", activeCardId!)
-              .order("created_at", { ascending: true }),
-          ]);
-          setBoardLabels((labelsData.data as Label[]) ?? []);
-          setBoardMembers((membersData.data as Member[]) ?? []);
-          setComments((commentsData.data as Comment[]) ?? []);
-        }
-
-        // Fetch templates (user-scoped, not board-scoped)
-        const tplResult = await getTemplates();
-        if (tplResult.data) setTemplates(tplResult.data);
-      }
-      setLoading(false);
-    }
-
-    fetchCard();
-  }, [activeCardId]);
+    setCard(activeCardData.card);
+    setBoardLabels(activeCardData.boardLabels);
+    setBoardMembers(activeCardData.boardMembers);
+    setComments(activeCardData.comments);
+    setTemplates(activeCardData.templates);
+  }, [activeCardData]);
 
   async function handleDeleteCard() {
     if (!card) return;
@@ -225,44 +158,40 @@ export default function CardModal() {
                   />
 
                   {/* Members */}
-                  {boardId && (
-                    <CardMembers
-                      cardId={card.id}
-                      boardId={boardId}
-                      activeMembers={card.card_members.map((cm) => cm.members)}
-                      boardMembers={boardMembers}
-                      onUpdate={(members) => {
-                        const card_members = members.map((m) => ({
-                          member_id: m.id,
-                          members: m,
-                        }));
-                        setCard((prev) =>
-                          prev ? { ...prev, card_members } : prev
-                        );
-                        notifyCardChange({ id: card.id, card_members });
-                      }}
-                    />
-                  )}
+                  <CardMembers
+                    cardId={card.id}
+                    boardId={boardId}
+                    activeMembers={card.card_members.map((cm) => cm.members)}
+                    boardMembers={boardMembers}
+                    onUpdate={(members) => {
+                      const card_members = members.map((m) => ({
+                        member_id: m.id,
+                        members: m,
+                      }));
+                      setCard((prev) =>
+                        prev ? { ...prev, card_members } : prev
+                      );
+                      notifyCardChange({ id: card.id, card_members });
+                    }}
+                  />
 
                   {/* Labels */}
-                  {boardId && (
-                    <CardLabels
-                      cardId={card.id}
-                      boardId={boardId}
-                      activeLabels={card.card_labels.map((cl) => cl.labels)}
-                      boardLabels={boardLabels}
-                      onUpdate={(labels) => {
-                        const card_labels = labels.map((l) => ({
-                          label_id: l.id,
-                          labels: l,
-                        }));
-                        setCard((prev) =>
-                          prev ? { ...prev, card_labels } : prev
-                        );
-                        notifyCardChange({ id: card.id, card_labels });
-                      }}
-                    />
-                  )}
+                  <CardLabels
+                    cardId={card.id}
+                    boardId={boardId}
+                    activeLabels={card.card_labels.map((cl) => cl.labels)}
+                    boardLabels={boardLabels}
+                    onUpdate={(labels) => {
+                      const card_labels = labels.map((l) => ({
+                        label_id: l.id,
+                        labels: l,
+                      }));
+                      setCard((prev) =>
+                        prev ? { ...prev, card_labels } : prev
+                      );
+                      notifyCardChange({ id: card.id, card_labels });
+                    }}
+                  />
 
                   {/* Checklists */}
                   {card.checklists.map((checklist) => (
