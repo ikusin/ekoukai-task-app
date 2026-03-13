@@ -22,6 +22,8 @@ type Props = {
   onListDeleted: (listId: string) => void;
   onListColorChanged: (listId: string, color: string) => void;
   onToggleCollapse: (listId: string) => void;
+  /** Mobile only: tap collapsed list to open fullscreen sheet */
+  onMobileTap?: () => void;
 };
 
 export default function ListColumn({
@@ -32,6 +34,7 @@ export default function ListColumn({
   onListDeleted,
   onListColorChanged,
   onToggleCollapse,
+  onMobileTap,
 }: Props) {
   const {
     attributes,
@@ -86,11 +89,16 @@ export default function ListColumn({
           ...sortableStyle,
           backgroundColor: isCardOver ? undefined : accentColor,
         }}
+        onClick={() => {
+          if (isCardOver) return;
+          if (onMobileTap) onMobileTap();
+          else onToggleCollapse(list.id);
+        }}
         className={`flex-shrink-0 flex flex-col items-center rounded-xl py-3 gap-2 border shadow-sm transition-all duration-200 ${
           isCardOver
             ? "w-16 bg-sky-100 border-sky-400 ring-2 ring-sky-400 ring-offset-2 shadow-xl shadow-sky-200 scale-105"
             : "w-10 border-black/10"
-        }`}
+        } ${onMobileTap ? "cursor-pointer active:brightness-90" : ""}`}
       >
         {isCardOver ? (
           <>
@@ -111,13 +119,16 @@ export default function ListColumn({
           </>
         ) : (
           <>
-            <button
-              onClick={() => onToggleCollapse(list.id)}
-              className="text-slate-700 hover:text-slate-900 text-xs mt-1 transition-colors"
-              title="展開"
-            >
-              <ChevronRight size={16} />
-            </button>
+            {/* Desktop: button to toggle collapse; Mobile: whole div is tappable */}
+            {!onMobileTap && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onToggleCollapse(list.id); }}
+                className="text-slate-700 hover:text-slate-900 text-xs mt-1 transition-colors"
+                title="展開"
+              >
+                <ChevronRight size={16} />
+              </button>
+            )}
             <span
               className="text-xs font-semibold text-slate-700"
               style={{

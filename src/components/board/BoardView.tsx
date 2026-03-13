@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ChevronLeft, Calendar, CheckSquare } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -17,20 +18,152 @@ import {
 } from "@dnd-kit/sortable";
 import ListColumn from "./ListColumn";
 import AddListButton from "./AddListButton";
+import AddCardButton from "./AddCardButton";
 import CardItem from "./CardItem";
 import CalendarView from "./CalendarView";
 import GanttView from "./GanttView";
 import BoardBackgroundPicker from "./BoardBackgroundPicker";
 import BoardExportButton from "./BoardExportButton";
-import { CardModalProvider } from "@/context/CardModalContext";
+import { CardModalProvider, useCardModal } from "@/context/CardModalContext";
 import CardModal from "@/components/card-modal/CardModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
+import { formatDate, isOverdue, getMemberInitials } from "@/lib/utils";
 import type { BoardState, List, CardWithLabels } from "@/types/app.types";
 
 type CardUpdate = Partial<
   Pick<CardWithLabels, "due_date" | "card_labels" | "card_members" | "checklists">
 > & { id: string };
 
+// ── Mobile: card row (tap to open modal, no drag) ────────────────────────────
+function MobileCardRow({ card }: { card: CardWithLabels }) {
+  const { openCard } = useCardModal();
+  const overdue = isOverdue(card.due_date);
+  const totalItems = card.checklists.reduce((s, cl) => s + cl.checklist_items.length, 0);
+  const doneItems = card.checklists.reduce(
+    (s, cl) => s + cl.checklist_items.filter((i) => i.is_done).length,
+    0
+  );
+
+  return (
+    <button
+      onClick={() => openCard(card.id)}
+      className="w-full text-left bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm active:scale-[0.98] transition-transform"
+    >
+      {card.card_labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {card.card_labels.map(({ labels }) => (
+            <span
+              key={labels.id}
+              className="inline-block w-8 h-1.5 rounded-full"
+              style={{ backgroundColor: labels.color }}
+            />
+          ))}
+        </div>
+      )}
+      <p className="text-sm text-slate-800 leading-snug">{card.title}</p>
+      {(card.due_date || totalItems > 0 || card.card_members.length > 0) && (
+        <div className="mt-2 flex items-center flex-wrap gap-1.5">
+          {card.due_date && (
+            <span
+              className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                overdue
+                  ? "bg-red-50 text-red-600 border border-red-100"
+                  : "bg-slate-50 text-slate-500 border border-slate-100"
+              }`}
+            >
+              <Calendar size={11} />
+              {formatDate(card.due_date)}
+            </span>
+          )}
+          {totalItems > 0 && (
+            <span
+              className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                doneItems === totalItems
+                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                  : "bg-slate-50 text-slate-500 border border-slate-100"
+              }`}
+            >
+              <CheckSquare size={11} />
+              {doneItems}/{totalItems}
+            </span>
+          )}
+          {card.card_members.length > 0 && (
+            <div className="flex -space-x-1.5 ml-auto">
+              {card.card_members.slice(0, 4).map(({ members }) => (
+                <span
+                  key={members.id}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm"
+                  style={{ backgroundColor: members.color }}
+                  title={members.name}
+                >
+                  {getMemberInitials(members.name)}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </button>
+  );
+}
+
+// ── Mobile: fullscreen list sheet ────────────────────────────────────────────
+type MobileListSheetProps = {
+  list: List;
+  cards: CardWithLabels[];
+  onClose: () => void;
+  onCardCreated: (card: CardWithLabels) => void;
+};
+
+function MobileListSheet({ list, cards, onClose, onCardCreated }: MobileListSheetProps) {
+  const accentColor = list.color ?? "#e2e8f0";
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={onClose} />
+      {/* Sheet */}
+      <div
+        className="fixed inset-0 z-50 md:hidden flex flex-col bg-slate-100"
+        style={{ animation: "mobileSheetIn 0.22s ease-out" }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center gap-3 px-4 py-4 flex-shrink-0"
+          style={{ backgroundColor: accentColor }}
+        >
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-700 hover:bg-black/10 active:bg-black/20 transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <span className="flex-1 text-sm font-semibold text-slate-800 truncate">
+            {list.title}
+          </span>
+          <span className="text-xs text-slate-600 font-medium bg-black/10 px-2 py-0.5 rounded-full">
+            {cards.length}
+          </span>
+        </div>
+
+        {/* Card list */}
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+          {cards.length === 0 ? (
+            <p className="text-center text-sm text-slate-400 py-12">カードがありません</p>
+          ) : (
+            cards.map((card) => <MobileCardRow key={card.id} card={card} />)
+          )}
+        </div>
+
+        {/* Add card */}
+        <div className="px-3 py-3 bg-white border-t border-slate-200 flex-shrink-0">
+          <AddCardButton listId={list.id} onCardCreated={onCardCreated} />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main BoardView ────────────────────────────────────────────────────────────
 type Props = {
   boardId: string;
   boardTitle: string;
@@ -53,6 +186,23 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
   });
   const [view, setView] = useState<"kanban" | "calendar" | "gantt">("kanban");
   const [background, setBackground] = useState<string | null>(initialBackground);
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+  const [mobileExpandedListId, setMobileExpandedListId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Close sheet when switching to desktop
+  useEffect(() => {
+    if (!isMobile) setMobileExpandedListId(null);
+  }, [isMobile]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -96,6 +246,10 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
         [listId]: [...(prev.cardsByList[listId] ?? []), card],
       },
     }));
+    // Update mobile sheet if it's open for this list
+    if (mobileExpandedListId === listId) {
+      setMobileExpandedListId(listId); // re-render sheet with new card
+    }
   }
 
   function handleListColorChanged(listId: string, color: string) {
@@ -141,6 +295,11 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
   const bgStyle: React.CSSProperties = background
     ? { background, backgroundSize: "cover", backgroundPosition: "center" }
     : { backgroundColor: "rgb(226 232 240 / 0.6)" };
+
+  // Mobile expanded list data
+  const mobileExpandedList = mobileExpandedListId
+    ? boardState.lists.find((l) => l.id === mobileExpandedListId)
+    : null;
 
   return (
     <CardModalProvider boardId={boardId} onCardUpdated={handleCardUpdated} onCardDeleted={handleCardDeleted}>
@@ -215,15 +374,19 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                       key={list.id}
                       list={list}
                       cards={boardState.cardsByList[list.id] ?? []}
-                      collapsed={!!collapsed[list.id]}
+                      collapsed={isMobile ? true : !!collapsed[list.id]}
                       onCardCreated={(card) => handleCardCreated(list.id, card)}
                       onListDeleted={handleListDeleted}
                       onListColorChanged={handleListColorChanged}
                       onToggleCollapse={handleToggleCollapse}
+                      onMobileTap={isMobile ? () => setMobileExpandedListId(list.id) : undefined}
                     />
                   ))}
 
-                  <AddListButton boardId={boardId} onListCreated={handleListCreated} />
+                  {/* AddListButton hidden on mobile (use sheet instead) */}
+                  {!isMobile && (
+                    <AddListButton boardId={boardId} onListCreated={handleListCreated} />
+                  )}
                 </div>
               </SortableContext>
 
@@ -255,6 +418,16 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
           )}
         </div>
       </div>
+
+      {/* Mobile fullscreen list sheet */}
+      {isMobile && mobileExpandedList && (
+        <MobileListSheet
+          list={mobileExpandedList}
+          cards={boardState.cardsByList[mobileExpandedList.id] ?? []}
+          onClose={() => setMobileExpandedListId(null)}
+          onCardCreated={(card) => handleCardCreated(mobileExpandedList.id, card)}
+        />
+      )}
 
       <CardModal />
     </CardModalProvider>

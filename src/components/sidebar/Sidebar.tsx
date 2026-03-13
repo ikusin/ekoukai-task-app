@@ -129,7 +129,7 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-30 p-2 bg-slate-900 rounded-lg shadow-md text-slate-300"
+        className="md:hidden fixed top-3 right-3 z-30 p-2 bg-slate-900 rounded-lg shadow-md text-slate-300"
       >
         <Menu size={20} />
       </button>
@@ -153,14 +153,14 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
         </button>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — slides from right on mobile, fixed left on desktop */}
       <aside
         className={`
-          fixed md:relative inset-y-0 left-0 z-50
+          fixed md:relative inset-y-0 right-0 md:right-auto md:left-0 z-50
           bg-slate-900 flex-shrink-0
           transition-all duration-200 ease-in-out overflow-hidden
-          ${collapsed ? "md:w-0" : "w-60"}
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          ${collapsed ? "md:w-0" : "w-72 md:w-60"}
+          ${mobileOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}
         `}
       >
         {content}

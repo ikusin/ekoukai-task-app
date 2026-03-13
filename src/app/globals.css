@@ -52,6 +52,12 @@ body {
   border-radius: 2px;
 }
 
+/* Mobile list sheet slide-in */
+@keyframes mobileSheetIn {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1;   }
+}
+
 /* List column scrollbar */
 .list-scroll {
   scrollbar-width: thin;
