@@ -51,7 +51,7 @@ export default function CardComments({ cardId, initialComments }: Props) {
         <div className="space-y-3 mb-4">
           {comments.map((comment) => (
             <div key={comment.id} className="group flex gap-2">
-              <div className="flex-1 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-700 border border-slate-200 whitespace-pre-wrap break-words">
+              <div className="flex-1 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 border border-slate-200 whitespace-pre-wrap break-words">
                 {comment.text}
               </div>
               <div className="flex flex-col items-end gap-1 flex-shrink-0">

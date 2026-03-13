@@ -150,7 +150,7 @@ export default function CardModal() {
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 z-40" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] z-50 overflow-hidden">
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] z-50 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-48">
               <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
@@ -334,7 +334,7 @@ export default function CardModal() {
               </div>
 
               {/* Right: comments panel */}
-              <div className="w-80 border-l border-slate-200 overflow-y-auto p-4 bg-slate-50 flex-shrink-0">
+              <div className="w-96 border-l border-slate-200 overflow-y-auto p-5 bg-slate-50 flex-shrink-0">
                 <CardComments
                   cardId={card.id}
                   initialComments={comments}
