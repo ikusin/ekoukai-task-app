@@ -125,7 +125,9 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
     if (prefetchTimers.current.has(cardId)) return;
     const timer = setTimeout(() => {
       prefetchTimers.current.delete(cardId);
-      doFetchAndCache(cardId);
+      doFetchAndCache(cardId).catch(() => {
+        // Prefetch failed silently — will retry on actual open
+      });
     }, 200);
     prefetchTimers.current.set(cardId, timer);
   }
@@ -152,12 +154,18 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
     // Not cached → show spinner, fetch (or await in-flight prefetch)
     setActiveCardData(null);
     setLoading(true);
-    doFetchAndCache(cardId).then((data) => {
-      if (openCardIdRef.current === cardId) {
-        setActiveCardData(data);
-        setLoading(false);
-      }
-    });
+    doFetchAndCache(cardId)
+      .then((data) => {
+        if (openCardIdRef.current === cardId) {
+          setActiveCardData(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (openCardIdRef.current === cardId) {
+          setLoading(false);
+        }
+      });
   }
 
   function closeCard() {

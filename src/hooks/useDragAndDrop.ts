@@ -8,7 +8,8 @@ import type { BoardState, CardWithLabels, List } from "@/types/app.types";
 export function useDragAndDrop(
   boardState: BoardState,
   setBoardState: React.Dispatch<React.SetStateAction<BoardState>>,
-  boardId: string
+  boardId: string,
+  collapsedLists: Record<string, boolean>
 ) {
   const [activeCard, setActiveCard] = useState<CardWithLabels | null>(null);
   const [activeList, setActiveList] = useState<List | null>(null);
@@ -74,6 +75,11 @@ export function useDragAndDrop(
 
     if (!overListId || activeListId === overListId) return;
 
+    // Skip optimistic move for collapsed lists:
+    // collapsed lists have no SortableContext, so moving a card there would
+    // unmount the CardItem during an active drag and confuse dnd-kit.
+    if (collapsedLists[overListId]) return;
+
     setBoardState((prev) => {
       const activeCards = [...(prev.cardsByList[activeListId] ?? [])];
       const overCards = [...(prev.cardsByList[overListId] ?? [])];
@@ -118,13 +124,21 @@ export function useDragAndDrop(
     const activeCardId = active.id as string;
     const overId = over.id as string;
 
-    const activeListId = findListIdForCard(activeCardId);
-    if (!activeListId) return;
+    // Where is the card right now in state?
+    const currentListId = findListIdForCard(activeCardId);
+    if (!currentListId) return;
 
-    // Reorder within same list
-    if (activeCardId !== overId) {
+    const resolvedId = overId.startsWith("drop-") ? overId.slice(5) : overId;
+    const targetListId =
+      boardState.cardsByList[resolvedId] !== undefined
+        ? resolvedId
+        : currentListId;
+
+    // Reorder within same list (expanded lists only — card is already there
+    // due to optimistic handleDragOver update)
+    if (currentListId === targetListId && activeCardId !== overId) {
       setBoardState((prev) => {
-        const listCards = [...(prev.cardsByList[activeListId] ?? [])];
+        const listCards = [...(prev.cardsByList[currentListId] ?? [])];
         const oldIndex = listCards.findIndex((c) => c.id === activeCardId);
         const newIndex = listCards.findIndex((c) => c.id === overId);
 
@@ -134,17 +148,33 @@ export function useDragAndDrop(
           ...prev,
           cardsByList: {
             ...prev.cardsByList,
-            [activeListId]: arrayMove(listCards, oldIndex, newIndex),
+            [currentListId]: arrayMove(listCards, oldIndex, newIndex),
           },
         };
       });
     }
 
-    const resolvedId = overId.startsWith("drop-") ? overId.slice(5) : overId;
-    const targetListId =
-      boardState.cardsByList[resolvedId] !== undefined
-        ? resolvedId
-        : activeListId;
+    // Dropped on a collapsed list: handleDragOver skipped the optimistic move,
+    // so we apply the state change here at drop time.
+    if (currentListId !== targetListId && collapsedLists[targetListId]) {
+      setBoardState((prev) => {
+        const from = [...(prev.cardsByList[currentListId] ?? [])];
+        const to = [...(prev.cardsByList[targetListId] ?? [])];
+        const idx = from.findIndex((c) => c.id === activeCardId);
+        if (idx === -1) return prev;
+        const [movedCard] = from.splice(idx, 1);
+        to.push(movedCard);
+        return {
+          ...prev,
+          cardsByList: {
+            ...prev.cardsByList,
+            [currentListId]: from,
+            [targetListId]: to,
+          },
+        };
+      });
+    }
+
     const targetCards = boardState.cardsByList[targetListId] ?? [];
     const newIndex = targetCards.findIndex((c) => c.id === activeCardId);
     const finalIndex = newIndex === -1 ? targetCards.length : newIndex;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useDroppable } from "@dnd-kit/core";
+import { useState } from "react";
+import { useDroppable, useDndMonitor } from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
@@ -46,6 +47,20 @@ export default function ListColumn({
     id: `drop-${list.id}`,
   });
 
+  // Track card-drag-over for collapsed lists via monitor
+  // (can't rely on useDroppable.isOver when sortable and droppable share same element)
+  const [isCardOver, setIsCardOver] = useState(false);
+  useDndMonitor({
+    onDragOver({ active, over }) {
+      if (!collapsed) return;
+      const isCard = active.data.current?.type !== "list";
+      const overId = String(over?.id ?? "");
+      setIsCardOver(isCard && (overId === list.id || overId === `drop-${list.id}`));
+    },
+    onDragEnd() { setIsCardOver(false); },
+    onDragCancel() { setIsCardOver(false); },
+  });
+
   const accentColor = list.color ?? "#e2e8f0";
 
   const sortableStyle = {
@@ -69,15 +84,15 @@ export default function ListColumn({
         }}
         style={{
           ...sortableStyle,
-          backgroundColor: isOver ? undefined : accentColor,
+          backgroundColor: isCardOver ? undefined : accentColor,
         }}
         className={`flex-shrink-0 flex flex-col items-center rounded-xl py-3 gap-2 border shadow-sm transition-all duration-200 ${
-          isOver
+          isCardOver
             ? "w-16 bg-sky-100 border-sky-400 ring-2 ring-sky-400 ring-offset-2 shadow-xl shadow-sky-200 scale-105"
             : "w-10 border-black/10"
         }`}
       >
-        {isOver ? (
+        {isCardOver ? (
           <>
             <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center shadow-md animate-bounce">
               <ArrowDown size={16} className="text-white" />

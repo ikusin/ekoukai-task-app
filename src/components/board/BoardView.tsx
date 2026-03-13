@@ -69,7 +69,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
   }, [initialState]);
 
   const { activeCard, activeList, handleDragStart, handleDragOver, handleDragEnd } =
-    useDragAndDrop(boardState, setBoardState, boardId);
+    useDragAndDrop(boardState, setBoardState, boardId, collapsed);
 
   function handleListCreated(list: List) {
     setBoardState((prev) => ({
