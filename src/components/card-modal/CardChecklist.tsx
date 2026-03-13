@@ -139,12 +139,12 @@ export default function CardChecklist({
               }
             }}
             autoFocus
-            className="flex-1 px-2 py-1 text-sm font-semibold border border-sky-400 rounded focus:outline-none focus:ring-2 focus:ring-sky-500 mr-2"
+            className="flex-1 px-2 py-1 text-sm font-semibold border border-sky-400 rounded focus:outline-none focus:ring-2 focus:ring-sky-500 mr-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
           />
         ) : (
           <button
             onClick={() => setEditingTitle(true)}
-            className="text-sm font-semibold text-slate-700 flex items-center gap-2 hover:text-slate-900 text-left flex-1 min-w-0"
+            className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2 hover:text-slate-900 dark:hover:text-slate-100 text-left flex-1 min-w-0"
             title="クリックして名前を変更"
           >
             <CheckSquare size={15} className="text-slate-500 flex-shrink-0" /> {titleValue}
@@ -172,7 +172,7 @@ export default function CardChecklist({
       {total > 0 && (
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xs text-slate-500 w-8">{progress}%</span>
-          <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
             <div
               className="h-full bg-sky-500 rounded-full transition-all"
               style={{ width: `${progress}%` }}
@@ -200,7 +200,7 @@ export default function CardChecklist({
               />
               <span
                 className={`flex-1 text-sm min-w-0 ${
-                  item.is_done ? "line-through text-slate-400" : "text-slate-700"
+                  item.is_done ? "line-through text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200"
                 }`}
               >
                 {item.text}
@@ -209,7 +209,7 @@ export default function CardChecklist({
               {/* Assignee badge (always visible when set) */}
               {assignee && (
                 <span
-                  className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 flex-shrink-0 flex items-center gap-1"
+                  className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex-shrink-0 flex items-center gap-1"
                   title={getMemberDisplayName(assignee.name)}
                 >
                   <span
@@ -227,8 +227,8 @@ export default function CardChecklist({
                 <span
                   className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                     overdue
-                      ? "bg-red-100 text-red-700"
-                      : "bg-slate-100 text-slate-500"
+                      ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   {overdue ? "期限切れ" : formatDate(item.due_date)}
@@ -251,7 +251,7 @@ export default function CardChecklist({
                       side="top"
                       align="end"
                       sideOffset={4}
-                      className="z-[110] w-44 bg-white border border-slate-200 rounded-xl shadow-xl p-1"
+                      className="z-[110] w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1"
                     >
                       <p className="text-xs text-slate-400 px-2 py-1">担当者</p>
                       {assignee && (
@@ -315,7 +315,7 @@ export default function CardChecklist({
             placeholder="アイテムを追加..."
             rows={2}
             autoFocus
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -340,7 +340,7 @@ export default function CardChecklist({
                 setAddingItem(false);
                 setNewText("");
               }}
-              className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 text-sm rounded-lg transition-colors"
+              className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm rounded-lg transition-colors"
             >
               キャンセル
             </button>

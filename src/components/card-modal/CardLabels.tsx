@@ -77,7 +77,7 @@ export default function CardLabels({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5"><Tag size={15} className="text-slate-500" /> ラベル</h3>
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5"><Tag size={15} className="text-slate-500 dark:text-slate-400" /> ラベル</h3>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {active.map((label) => (
           <span
@@ -101,10 +101,10 @@ export default function CardLabels({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-64 z-[100]"
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 w-64 z-[100]"
             sideOffset={5}
           >
-            <p className="text-sm font-semibold text-slate-700 mb-3">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
               ラベル
             </p>
 
@@ -116,13 +116,13 @@ export default function CardLabels({
                   <button
                     key={label.id}
                     onClick={() => toggleLabel(label)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                   >
                     <span
                       className="w-6 h-6 rounded flex-shrink-0"
                       style={{ backgroundColor: label.color }}
                     />
-                    <span className="flex-1 text-sm text-left text-slate-700">
+                    <span className="flex-1 text-sm text-left text-slate-700 dark:text-slate-200">
                       {label.name}
                     </span>
                     {isActive && (
@@ -134,14 +134,14 @@ export default function CardLabels({
             </div>
 
             {/* Create label */}
-            <div className="border-t border-slate-200 pt-3">
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
               <p className="text-xs text-slate-500 mb-2">新しいラベルを作成</p>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="ラベル名"
-                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-2"
+                className="w-full px-2 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
               />
               <div className="flex flex-wrap gap-1 mb-2">
                 {PRESET_COLORS.map((c) => (

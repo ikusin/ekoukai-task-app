@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MessageSquare, Pencil, Check, X } from "lucide-react";
 import { createComment, deleteComment, updateComment } from "@/actions/comment.actions";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 import type { Comment } from "@/types/app.types";
 
 type Props = {
@@ -67,8 +68,8 @@ export default function CardComments({ cardId, initialComments }: Props) {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5">
-        <MessageSquare size={15} className="text-slate-500" /> コメント
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-1.5">
+        <MessageSquare size={15} className="text-slate-500 dark:text-slate-400" /> コメント
       </h3>
 
       {/* Comment list */}
@@ -107,7 +108,7 @@ export default function CardComments({ cardId, initialComments }: Props) {
                     onChange={(e) => setEditingText(e.target.value)}
                     rows={3}
                     autoFocus
-                    className="w-full px-3 py-2 border border-sky-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"
+                    className="w-full px-3 py-2 border border-sky-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -126,15 +127,15 @@ export default function CardComments({ cardId, initialComments }: Props) {
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="flex items-center gap-1 px-2.5 py-1 text-slate-500 hover:bg-slate-100 text-xs rounded-lg transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs rounded-lg transition-colors"
                     >
                       <X size={11} /> キャンセル
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-lg px-3 py-2 text-sm text-slate-700 border border-slate-200 whitespace-pre-wrap break-words">
-                  {comment.text}
+                <div className="bg-white dark:bg-slate-800 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 whitespace-pre-wrap break-words">
+                  <LinkifiedText text={comment.text} />
                 </div>
               )}
             </div>
@@ -149,7 +150,7 @@ export default function CardComments({ cardId, initialComments }: Props) {
           onChange={(e) => setText(e.target.value)}
           placeholder="コメントを追加... (Enter で送信、Shift+Enter で改行)"
           rows={4}
-          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y min-h-[96px]"
+          className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y min-h-[96px] bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

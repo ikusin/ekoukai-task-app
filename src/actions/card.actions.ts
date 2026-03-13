@@ -110,7 +110,8 @@ export async function duplicateCard(
     labels: boolean;
     checklists: boolean;
     comments: boolean;
-  }
+  },
+  targetListId?: string
 ): Promise<{ data?: Card; error?: string }> {
   const supabase = createClient();
   const {
@@ -131,11 +132,12 @@ export async function duplicateCard(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orig = original as any;
 
-  // Get next order in the same list
+  // Get next order in the target list (defaults to same list)
+  const destListId = targetListId ?? orig.list_id;
   const { data: cards } = await supabase
     .from("cards")
     .select("*")
-    .eq("list_id", orig.list_id)
+    .eq("list_id", destListId)
     .order("order", { ascending: false })
     .limit(1);
   const rows = cards as Card[] | null;
@@ -146,7 +148,7 @@ export async function duplicateCard(
     .from("cards")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .insert({
-      list_id: orig.list_id,
+      list_id: destListId,
       title: `${orig.title}（コピー）`,
       order: nextOrder,
       description: options.description ? orig.description : null,

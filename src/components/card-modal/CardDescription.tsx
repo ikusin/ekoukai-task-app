@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlignLeft } from "lucide-react";
 import { updateCard } from "@/actions/card.actions";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 type Props = {
   cardId: string;
@@ -31,8 +32,8 @@ export default function CardDescription({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-        <AlignLeft size={15} className="text-slate-500" /> 説明
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+        <AlignLeft size={15} className="text-slate-500 dark:text-slate-400" /> 説明
       </h3>
       {editing ? (
         <div className="space-y-2">
@@ -42,7 +43,7 @@ export default function CardDescription({
             autoFocus
             rows={4}
             placeholder="説明を追加..."
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
           />
           <div className="flex gap-2">
             <button
@@ -56,7 +57,7 @@ export default function CardDescription({
                 setValue(description ?? "");
                 setEditing(false);
               }}
-              className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 text-sm rounded-lg transition-colors"
+              className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm rounded-lg transition-colors"
             >
               キャンセル
             </button>
@@ -65,11 +66,13 @@ export default function CardDescription({
       ) : (
         <div
           onClick={() => setEditing(true)}
-          className={`w-full min-h-[60px] px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-slate-100 transition-colors ${
-            description ? "text-slate-700" : "text-slate-400"
+          className={`w-full min-h-[60px] px-3 py-2 rounded-lg text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-pre-wrap break-words ${
+            description ? "text-slate-700 dark:text-slate-200" : "text-slate-400 dark:text-slate-500"
           }`}
         >
-          {description ?? "説明を追加するにはクリックしてください..."}
+          {description
+            ? <LinkifiedText text={description} />
+            : "説明を追加するにはクリックしてください..."}
         </div>
       )}
     </div>

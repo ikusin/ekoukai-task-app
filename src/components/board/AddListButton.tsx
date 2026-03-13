@@ -38,7 +38,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
           setOpen(true);
           setTimeout(() => inputRef.current?.focus(), 50);
         }}
-        className="flex-shrink-0 w-[85vw] md:w-72 flex items-center gap-2 px-4 py-3 bg-white/60 hover:bg-white/80 rounded-xl text-slate-600 text-sm font-medium transition-colors border border-dashed border-slate-300"
+        className="flex-shrink-0 w-[85vw] md:w-72 flex items-center gap-2 px-4 py-3 bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 rounded-xl text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors border border-dashed border-slate-300 dark:border-slate-600"
       >
         <Plus size={16} />
         リストを追加
@@ -47,7 +47,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
   }
 
   return (
-    <div className="flex-shrink-0 w-[85vw] md:w-72 bg-slate-100 rounded-xl p-3">
+    <div className="flex-shrink-0 w-[85vw] md:w-72 bg-slate-100 dark:bg-slate-800 rounded-xl p-3">
       <form onSubmit={handleSubmit} className="space-y-2">
         <input
           ref={inputRef}
@@ -56,7 +56,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="リスト名を入力..."
           maxLength={100}
-          className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               setOpen(false);
@@ -78,7 +78,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
               setOpen(false);
               setTitle("");
             }}
-            className="px-3 py-1.5 text-slate-600 hover:bg-slate-200 text-sm rounded-lg transition-colors"
+            className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 text-sm rounded-lg transition-colors"
           >
             <X size={14} />
           </button>

@@ -42,7 +42,7 @@ export default function CardTitle({ cardId, title, onUpdate }: Props) {
         }}
         autoFocus
         rows={2}
-        className="w-full text-xl font-semibold text-slate-900 resize-none border border-sky-400 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-sky-500"
+        className="w-full text-xl font-semibold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-700 resize-none border border-sky-400 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-sky-500"
       />
     );
   }
@@ -50,7 +50,7 @@ export default function CardTitle({ cardId, title, onUpdate }: Props) {
   return (
     <h2
       onClick={() => setEditing(true)}
-      className="text-xl font-semibold text-slate-900 cursor-pointer hover:bg-slate-100 rounded-lg px-2 py-1 -mx-2 -my-1"
+      className="text-xl font-semibold text-slate-900 dark:text-slate-100 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg px-2 py-1 -mx-2 -my-1"
     >
       {title}
     </h2>

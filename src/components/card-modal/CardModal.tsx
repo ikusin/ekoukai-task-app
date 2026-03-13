@@ -83,7 +83,7 @@ export default function CardModal() {
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 z-40" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-[96vw] max-w-6xl max-h-[92vh] z-50 overflow-hidden">
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-[96vw] max-w-6xl max-h-[92vh] z-50 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-48">
               <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
@@ -107,13 +107,13 @@ export default function CardModal() {
                     <CardDuplicateButton cardId={card.id} />
                     <button
                       onClick={handleDeleteCard}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      className="p-2 text-gray-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
                       title="削除"
                     >
                       <Trash2 size={16} />
                     </button>
                     <Dialog.Close asChild>
-                      <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                      <button className="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors">
                         <X size={18} />
                       </button>
                     </Dialog.Close>
@@ -263,7 +263,7 @@ export default function CardModal() {
               </div>
 
               {/* Right: comments panel */}
-              <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-slate-200 overflow-y-auto p-4 md:p-5 bg-slate-50 flex-shrink-0">
+              <div className="w-full md:w-96 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 overflow-y-auto p-4 md:p-5 bg-slate-50 dark:bg-slate-900 flex-shrink-0">
                 <CardComments
                   cardId={card.id}
                   initialComments={comments}

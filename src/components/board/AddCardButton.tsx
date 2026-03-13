@@ -38,7 +38,7 @@ export default function AddCardButton({ listId, onCardCreated }: Props) {
           setOpen(true);
           setTimeout(() => inputRef.current?.focus(), 50);
         }}
-        className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1"
+        className="w-full text-left px-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1"
       >
         <Plus size={14} /> カードを追加
       </button>
@@ -54,7 +54,7 @@ export default function AddCardButton({ listId, onCardCreated }: Props) {
         placeholder="カードのタイトルを入力..."
         maxLength={200}
         rows={2}
-        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+        className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -80,7 +80,7 @@ export default function AddCardButton({ listId, onCardCreated }: Props) {
             setOpen(false);
             setTitle("");
           }}
-          className="px-3 py-1.5 text-slate-600 hover:bg-slate-200 text-xs rounded-lg transition-colors"
+          className="px-3 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 text-xs rounded-lg transition-colors"
         >
           <X size={14} />
         </button>

@@ -70,7 +70,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         }
       }}
       className={cn(
-        "relative group bg-white rounded-xl p-3 border border-slate-200/80 cursor-grab active:cursor-grabbing",
+        "relative group bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-200/80 dark:border-slate-700/80 cursor-grab active:cursor-grabbing",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150",
         isOverlay && "rotate-1 shadow-xl cursor-grabbing opacity-60",
         isDragging && "border-sky-300"
@@ -81,7 +81,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         <button
           onPointerDown={(e) => e.stopPropagation()}
           onClick={handleDelete}
-          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-md bg-slate-100 hover:bg-red-500 text-slate-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 z-10"
+          className="absolute top-1.5 right-1.5 w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-red-500 text-slate-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 z-10"
           title="カードを削除"
         >
           <X size={12} />
@@ -102,7 +102,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
         </div>
       )}
 
-      <p className="text-sm text-slate-800 leading-snug pr-4">{card.title}</p>
+      <p className="text-sm text-slate-800 dark:text-slate-100 leading-snug pr-4">{card.title}</p>
 
       {/* Metadata footer */}
       {hasFooter && (
@@ -112,8 +112,8 @@ export default function CardItem({ card, isOverlay = false }: Props) {
               className={cn(
                 "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full",
                 overdue
-                  ? "bg-red-50 text-red-600 border border-red-100"
-                  : "bg-slate-50 text-slate-500 border border-slate-100"
+                  ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-800"
+                  : "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-600"
               )}
             >
               <Calendar size={11} />
@@ -126,8 +126,8 @@ export default function CardItem({ card, isOverlay = false }: Props) {
               className={cn(
                 "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full",
                 checklistDone
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-slate-50 text-slate-500 border border-slate-100"
+                  ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800"
+                  : "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-600"
               )}
             >
               <CheckSquare size={11} />
@@ -140,7 +140,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
               {card.card_members.slice(0, 4).map(({ members }) => (
                 <span
                   key={members.id}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-slate-800 shadow-sm"
                   style={{ backgroundColor: members.color }}
                   title={members.name}
                 >

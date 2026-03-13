@@ -92,8 +92,8 @@ export default function CardMembers({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-        <Users size={15} className="text-slate-500" /> メンバー
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
+        <Users size={15} className="text-slate-500 dark:text-slate-400" /> メンバー
       </h3>
       <div className="flex flex-wrap gap-1.5 mb-2">
         {active.map((member) => (

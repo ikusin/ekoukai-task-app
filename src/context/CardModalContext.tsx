@@ -7,6 +7,7 @@ import type {
   CardWithDetails,
   CardWithLabels,
   Label,
+  List,
   Member,
   Comment,
   ChecklistWithItems,
@@ -21,6 +22,7 @@ export type CachedCardData = {
   card: CardWithDetails;
   boardLabels: Label[];
   boardMembers: Member[];
+  boardLists: List[];
   comments: Comment[];
   templates: ChecklistTemplateWithItems[];
 };
@@ -29,6 +31,7 @@ type CardModalContextType = {
   boardId: string;
   activeCardId: string | null;
   activeCardData: CachedCardData | null;
+  boardLists: List[];
   loading: boolean;
   openCard: (cardId: string) => void;
   closeCard: () => void;
@@ -72,13 +75,14 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
         .single(),
       supabase.from("labels").select("*").eq("board_id", boardId),
       supabase.from("members").select("*").eq("board_id", boardId),
+      supabase.from("lists").select("*").eq("board_id", boardId).order("order", { ascending: true }),
       supabase
         .from("card_comments")
         .select("*")
         .eq("card_id", cardId)
         .order("created_at", { ascending: true }),
       getTemplates(),
-    ]).then(([cardRes, labelsRes, membersRes, commentsRes, tplResult]) => {
+    ]).then(([cardRes, labelsRes, membersRes, listsRes, commentsRes, tplResult]) => {
       fetchPromises.current.delete(cardId);
       if (!cardRes.data) return null;
 
@@ -108,6 +112,7 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
         card,
         boardLabels: (labelsRes.data as Label[]) ?? [],
         boardMembers: (membersRes.data as Member[]) ?? [],
+        boardLists: (listsRes.data as List[]) ?? [],
         comments: (commentsRes.data as Comment[]) ?? [],
         templates: tplResult.data ?? [],
       };
@@ -197,6 +202,7 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
         boardId,
         activeCardId,
         activeCardData,
+        boardLists: activeCardData?.boardLists ?? [],
         loading,
         openCard,
         closeCard,

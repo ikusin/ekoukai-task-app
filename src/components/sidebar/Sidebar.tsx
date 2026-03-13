@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   DndContext,
   closestCenter,
@@ -26,6 +27,7 @@ import type { Board } from "@/types/app.types";
 
 export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) {
   const router = useRouter();
+  const { isDark, toggle: toggleTheme } = useTheme();
   const [boards, setBoards] = useState(initialBoards);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -112,7 +114,15 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
       {/* Footer */}
       <div className="flex-shrink-0">
         <div className="h-px bg-slate-800 mx-3" />
-        <div className="p-3">
+        <div className="p-3 space-y-0.5">
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            {isDark ? "ライトモード" : "ダークモード"}
+          </button>
           <button
             onClick={handleSignOut}
             className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"

@@ -46,8 +46,8 @@ export default function CardDueDate({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-          <Calendar size={15} className="text-slate-500" /> 日程
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+          <Calendar size={15} className="text-slate-500 dark:text-slate-400" /> 日程
         </h3>
         {/* Calendar toggle */}
         <button
@@ -55,8 +55,8 @@ export default function CardDueDate({
           className={cn(
             "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors",
             showInCalendar
-              ? "bg-sky-100 text-sky-700 border-sky-300 hover:bg-sky-200"
-              : "bg-slate-100 text-slate-500 border-slate-300 hover:bg-slate-200"
+              ? "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 border-sky-300 dark:border-sky-700 hover:bg-sky-200 dark:hover:bg-sky-900/60"
+              : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600"
           )}
           title="カレンダーへの表示をON/OFFする"
         >
@@ -73,7 +73,7 @@ export default function CardDueDate({
             type="date"
             defaultValue={startDate ?? ""}
             onChange={handleStartChange}
-            className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
           />
           {startDate && (
             <button
@@ -95,15 +95,15 @@ export default function CardDueDate({
             type="date"
             defaultValue={dueDate ?? ""}
             onChange={handleDueChange}
-            className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
           />
           {dueDate && (
             <span
               className={cn(
                 "text-xs px-2 py-1 rounded-full",
                 overdue
-                  ? "bg-red-100 text-red-700 font-medium"
-                  : "bg-slate-100 text-slate-600"
+                  ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 font-medium"
+                  : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
               )}
             >
               {overdue ? "期限切れ" : formatDate(dueDate)}
