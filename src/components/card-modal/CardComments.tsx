@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquare } from "lucide-react";
-import { createComment, deleteComment } from "@/actions/comment.actions";
+import { MessageSquare, Pencil, Check, X } from "lucide-react";
+import { createComment, deleteComment, updateComment } from "@/actions/comment.actions";
 import type { Comment } from "@/types/app.types";
 
 type Props = {
@@ -25,6 +25,8 @@ export default function CardComments({ cardId, initialComments }: Props) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
 
   async function handleSubmit() {
     if (!text.trim()) return;
@@ -42,29 +44,99 @@ export default function CardComments({ cardId, initialComments }: Props) {
     setComments((prev) => prev.filter((c) => c.id !== id));
   }
 
+  function startEdit(comment: Comment) {
+    setEditingId(comment.id);
+    setEditingText(comment.text);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingText("");
+  }
+
+  async function handleUpdate(id: string) {
+    if (!editingText.trim()) return;
+    const result = await updateComment(id, editingText.trim());
+    if (result.data) {
+      setComments((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, text: editingText.trim() } : c))
+      );
+      setEditingId(null);
+    }
+  }
+
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5"><MessageSquare size={15} className="text-slate-500" /> コメント</h3>
+      <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-1.5">
+        <MessageSquare size={15} className="text-slate-500" /> コメント
+      </h3>
 
       {/* Comment list */}
       {comments.length > 0 && (
-        <div className="space-y-3 mb-4">
+        <div className="space-y-2 mb-4">
           {comments.map((comment) => (
-            <div key={comment.id} className="group flex gap-2">
-              <div className="flex-1 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 border border-slate-200 whitespace-pre-wrap break-words">
-                {comment.text}
-              </div>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            <div key={comment.id} className="group">
+              {/* Date + actions row */}
+              <div className="flex items-center justify-between mb-0.5 px-1">
                 <span className="text-xs text-slate-400">
                   {formatDateTime(comment.created_at)}
                 </span>
-                <button
-                  onClick={() => handleDelete(comment.id)}
-                  className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-red-500 transition-all"
-                >
-                  削除
-                </button>
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  {editingId !== comment.id && (
+                    <button
+                      onClick={() => startEdit(comment)}
+                      className="text-xs text-slate-400 hover:text-sky-500 flex items-center gap-0.5 transition-colors"
+                    >
+                      <Pencil size={11} /> 編集
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(comment.id)}
+                    className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    削除
+                  </button>
+                </div>
               </div>
+
+              {/* Comment body */}
+              {editingId === comment.id ? (
+                <div className="space-y-1">
+                  <textarea
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    rows={3}
+                    autoFocus
+                    className="w-full px-3 py-2 border border-sky-400 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleUpdate(comment.id);
+                      }
+                      if (e.key === "Escape") cancelEdit();
+                    }}
+                  />
+                  <div className="flex gap-1.5 justify-end">
+                    <button
+                      onClick={() => handleUpdate(comment.id)}
+                      disabled={!editingText.trim()}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300 text-white text-xs rounded-lg transition-colors"
+                    >
+                      <Check size={11} /> 保存
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="flex items-center gap-1 px-2.5 py-1 text-slate-500 hover:bg-slate-100 text-xs rounded-lg transition-colors"
+                    >
+                      <X size={11} /> キャンセル
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg px-3 py-2 text-sm text-slate-700 border border-slate-200 whitespace-pre-wrap break-words">
+                  {comment.text}
+                </div>
+              )}
             </div>
           ))}
         </div>
