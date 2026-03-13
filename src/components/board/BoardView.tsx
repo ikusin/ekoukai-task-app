@@ -146,7 +146,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
     <CardModalProvider onCardUpdated={handleCardUpdated} onCardDeleted={handleCardDeleted}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 md:px-4 py-2 bg-white border-b border-slate-200 flex-shrink-0">
           {/* Left buttons */}
           <div className="flex items-center gap-2">
             <BoardBackgroundPicker
@@ -158,10 +158,10 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
           </div>
 
           {/* View toggle */}
-          <div className="flex rounded-lg border border-slate-300 overflow-hidden text-sm">
+          <div className="flex rounded-lg border border-slate-300 overflow-hidden text-xs md:text-sm">
             <button
               onClick={() => setView("kanban")}
-              className={`px-3 py-1.5 transition-colors ${
+              className={`px-2.5 md:px-3 py-1.5 transition-colors ${
                 view === "kanban"
                   ? "bg-sky-500 text-white"
                   : "bg-white text-slate-600 hover:bg-slate-50"
@@ -171,7 +171,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
             </button>
             <button
               onClick={() => setView("calendar")}
-              className={`px-3 py-1.5 border-l border-slate-300 transition-colors ${
+              className={`px-2.5 md:px-3 py-1.5 border-l border-slate-300 transition-colors ${
                 view === "calendar"
                   ? "bg-sky-500 text-white"
                   : "bg-white text-slate-600 hover:bg-slate-50"
@@ -181,7 +181,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
             </button>
             <button
               onClick={() => setView("gantt")}
-              className={`px-3 py-1.5 border-l border-slate-300 transition-colors ${
+              className={`px-2.5 md:px-3 py-1.5 border-l border-slate-300 transition-colors ${
                 view === "gantt"
                   ? "bg-sky-500 text-white"
                   : "bg-white text-slate-600 hover:bg-slate-50"
@@ -207,7 +207,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                 strategy={horizontalListSortingStrategy}
               >
                 <div
-                  className="flex gap-4 p-4 h-full overflow-x-auto kanban-scroll items-start"
+                  className="flex gap-3 md:gap-4 p-3 md:p-4 h-full overflow-x-auto kanban-scroll items-start"
                   style={bgStyle}
                 >
                   {boardState.lists.map((list) => (
@@ -232,7 +232,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                   <CardItem card={activeCard} isOverlay />
                 ) : activeList ? (
                   <div
-                    className="w-72 rounded-xl border border-slate-300 shadow-xl opacity-90 overflow-hidden"
+                    className="w-[85vw] md:w-72 rounded-xl border border-slate-300 shadow-xl opacity-90 overflow-hidden"
                     style={{ backgroundColor: activeList.color ?? "#e2e8f0" }}
                   >
                     <div className="px-3 py-3">

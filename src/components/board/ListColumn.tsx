@@ -94,7 +94,7 @@ export default function ListColumn({
     <div
       ref={setSortableRef}
       style={sortableStyle}
-      className="flex-shrink-0 w-72 flex flex-col rounded-xl max-h-full shadow-sm overflow-hidden border border-black/5"
+      className="flex-shrink-0 w-[85vw] md:w-72 flex flex-col rounded-xl max-h-full shadow-sm overflow-hidden border border-black/5"
     >
       <ListHeader
         list={list}

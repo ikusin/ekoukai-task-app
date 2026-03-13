@@ -38,7 +38,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
           setOpen(true);
           setTimeout(() => inputRef.current?.focus(), 50);
         }}
-        className="flex-shrink-0 w-72 flex items-center gap-2 px-4 py-3 bg-white/60 hover:bg-white/80 rounded-xl text-slate-600 text-sm font-medium transition-colors border border-dashed border-slate-300"
+        className="flex-shrink-0 w-[85vw] md:w-72 flex items-center gap-2 px-4 py-3 bg-white/60 hover:bg-white/80 rounded-xl text-slate-600 text-sm font-medium transition-colors border border-dashed border-slate-300"
       >
         <Plus size={16} />
         リストを追加
@@ -47,7 +47,7 @@ export default function AddListButton({ boardId, onListCreated }: Props) {
   }
 
   return (
-    <div className="flex-shrink-0 w-72 bg-slate-100 rounded-xl p-3">
+    <div className="flex-shrink-0 w-[85vw] md:w-72 bg-slate-100 rounded-xl p-3">
       <form onSubmit={handleSubmit} className="space-y-2">
         <input
           ref={inputRef}

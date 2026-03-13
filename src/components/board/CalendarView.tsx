@@ -42,16 +42,13 @@ export default function CalendarView({ boardState }: Props) {
     .flat()
     .filter((c) => c.show_in_calendar !== false);
 
-  // Build per-date card list
   function getCardsForDate(dateKey: string): CardEntry[] {
     if (!showRange) {
-      // Due-date only mode
       return allCards
         .filter((c) => c.due_date === dateKey)
         .map((card) => ({ card, position: "single" as const }));
     }
 
-    // Range mode: show card on every day between start_date and due_date
     const result: CardEntry[] = [];
     for (const card of allCards) {
       if (!card.due_date) continue;
@@ -69,7 +66,6 @@ export default function CalendarView({ boardState }: Props) {
     return result;
   }
 
-  // Calendar grid
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startOffset = new Date(year, month, 1).getDay();
 
@@ -90,16 +86,16 @@ export default function CalendarView({ boardState }: Props) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-slate-200/60 h-full">
+    <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-slate-200/60 h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+      <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 flex-wrap">
         <button
           onClick={prevMonth}
           className="p-1.5 rounded-lg hover:bg-white/60 text-slate-600 transition-colors"
         >
           <ChevronLeft size={18} />
         </button>
-        <h2 className="text-base font-semibold text-slate-800 min-w-[120px] text-center">
+        <h2 className="text-base font-semibold text-slate-800 min-w-[100px] md:min-w-[120px] text-center">
           {year}年{month + 1}月
         </h2>
         <button
@@ -110,7 +106,7 @@ export default function CalendarView({ boardState }: Props) {
         </button>
         <button
           onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}
-          className="px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+          className="px-2.5 md:px-3 py-1 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
         >
           今月
         </button>
@@ -118,13 +114,15 @@ export default function CalendarView({ boardState }: Props) {
         {/* Range toggle */}
         <button
           onClick={() => setShowRange((v) => !v)}
-          className={`ml-auto px-3 py-1 text-sm rounded-lg border transition-colors flex items-center ${
+          className={`ml-auto px-2 md:px-3 py-1 text-xs md:text-sm rounded-lg border transition-colors flex items-center gap-1 ${
             showRange
               ? "bg-sky-500 text-white border-sky-500"
               : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
           }`}
         >
-          {showRange ? <><Calendar size={14} className="mr-1" /> 範囲表示: ON</> : <><Calendar size={14} className="mr-1" /> 範囲表示: OFF</>}
+          <Calendar size={13} />
+          <span className="hidden sm:inline">{showRange ? "範囲表示: ON" : "範囲表示: OFF"}</span>
+          <span className="sm:hidden">{showRange ? "ON" : "OFF"}</span>
         </button>
       </div>
 
@@ -143,9 +141,9 @@ export default function CalendarView({ boardState }: Props) {
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 md:gap-1">
         {cells.map((day, i) => {
-          if (!day) return <div key={`empty-${i}`} className="min-h-[80px]" />;
+          if (!day) return <div key={`empty-${i}`} className="min-h-[52px] md:min-h-[80px]" />;
 
           const dateKey = toDateKey(year, month, day);
           const entries = getCardsForDate(dateKey);
@@ -155,12 +153,12 @@ export default function CalendarView({ boardState }: Props) {
           return (
             <div
               key={dateKey}
-              className={`min-h-[80px] bg-white rounded-lg p-1.5 border transition-colors ${
+              className={`min-h-[52px] md:min-h-[80px] bg-white rounded-lg p-0.5 md:p-1.5 border transition-colors ${
                 isToday ? "border-sky-500 ring-1 ring-sky-300" : "border-slate-200"
               }`}
             >
               {/* Day number */}
-              <div className="mb-1">
+              <div className="mb-0.5 md:mb-1">
                 <span
                   className={`text-xs font-medium inline-flex items-center justify-center w-5 h-5 rounded-full ${
                     isToday
@@ -176,13 +174,12 @@ export default function CalendarView({ boardState }: Props) {
                 </span>
               </div>
 
-              {/* Cards */}
+              {/* Cards — text on md+, colored dots on mobile */}
               <div className="space-y-0.5">
                 {entries.map(({ card, position }) => {
                   const overdue = isOverdue(card.due_date);
                   const labelColor = card.card_labels?.[0]?.labels?.color ?? null;
 
-                  // Color and prefix by position
                   const bgClass =
                     position === "start"
                       ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
@@ -192,20 +189,26 @@ export default function CalendarView({ boardState }: Props) {
                       ? "bg-red-100 text-red-800 hover:bg-red-200"
                       : "bg-sky-100 text-sky-800 hover:bg-sky-200";
 
+                  const dotColor =
+                    position === "start" || position === "middle"
+                      ? "#10b981"
+                      : overdue
+                      ? "#ef4444"
+                      : labelColor ?? "#0ea5e9";
+
                   const prefix =
-                    position === "start"
-                      ? "→ "
-                      : position === "middle"
-                      ? "· "
-                      : position === "end"
-                      ? "← "
-                      : "";
+                    position === "start" ? "→ "
+                    : position === "middle" ? "· "
+                    : position === "end" ? "← "
+                    : "";
 
                   return (
                     <button
                       key={card.id}
                       onClick={() => openCard(card.id)}
-                      className={`w-full text-left text-xs px-1.5 py-0.5 rounded truncate transition-colors ${bgClass}`}
+                      title={card.title}
+                      className={`w-full text-left rounded transition-colors ${bgClass}
+                        hidden md:block text-xs px-1.5 py-0.5 truncate`}
                     >
                       {labelColor && (
                         <span
@@ -217,6 +220,36 @@ export default function CalendarView({ boardState }: Props) {
                     </button>
                   );
                 })}
+
+                {/* Mobile: colored dots */}
+                {entries.length > 0 && (
+                  <div className="md:hidden flex flex-wrap gap-0.5 mt-0.5">
+                    {entries.slice(0, 3).map(({ card, position }) => {
+                      const overdue = isOverdue(card.due_date);
+                      const labelColor = card.card_labels?.[0]?.labels?.color ?? null;
+                      const dotColor =
+                        position === "start" || position === "middle"
+                          ? "#10b981"
+                          : overdue
+                          ? "#ef4444"
+                          : labelColor ?? "#0ea5e9";
+                      return (
+                        <button
+                          key={card.id}
+                          onClick={() => openCard(card.id)}
+                          title={card.title}
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: dotColor }}
+                        />
+                      );
+                    })}
+                    {entries.length > 3 && (
+                      <span className="text-[10px] text-slate-400 leading-none">
+                        +{entries.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
