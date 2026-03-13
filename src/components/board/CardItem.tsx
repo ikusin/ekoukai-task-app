@@ -72,7 +72,7 @@ export default function CardItem({ card, isOverlay = false }: Props) {
       className={cn(
         "relative group bg-white rounded-xl p-3 border border-slate-200/80 cursor-grab active:cursor-grabbing",
         "shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-150",
-        isOverlay && "rotate-1 shadow-xl cursor-grabbing",
+        isOverlay && "rotate-1 shadow-xl cursor-grabbing opacity-60",
         isDragging && "border-sky-300"
       )}
     >
