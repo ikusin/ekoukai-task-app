@@ -7,7 +7,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowDown } from "lucide-react";
 import ListHeader from "./ListHeader";
 import CardItem from "./CardItem";
 import AddCardButton from "./AddCardButton";
@@ -67,30 +67,56 @@ export default function ListColumn({
           setSortableRef(el);
           setDroppableRef(el);
         }}
-        style={{ ...sortableStyle, backgroundColor: accentColor }}
-        className={`flex-shrink-0 w-10 flex flex-col items-center rounded-xl py-3 gap-2 border border-black/10 shadow-sm transition-all ${
-          isOver ? "ring-2 ring-sky-400 brightness-95" : ""
+        style={{
+          ...sortableStyle,
+          backgroundColor: isOver ? undefined : accentColor,
+        }}
+        className={`flex-shrink-0 flex flex-col items-center rounded-xl py-3 gap-2 border shadow-sm transition-all duration-200 ${
+          isOver
+            ? "w-16 bg-sky-100 border-sky-400 ring-2 ring-sky-400 ring-offset-2 shadow-xl shadow-sky-200 scale-105"
+            : "w-10 border-black/10"
         }`}
       >
-        <button
-          onClick={() => onToggleCollapse(list.id)}
-          className="text-slate-700 hover:text-slate-900 text-xs mt-1 transition-colors"
-          title="展開"
-        >
-          <ChevronRight size={16} />
-        </button>
-        <span
-          className="text-xs font-semibold text-slate-700"
-          style={{
-            writingMode: "vertical-rl",
-            textOrientation: "mixed",
-            maxHeight: "160px",
-            overflow: "hidden",
-          }}
-        >
-          {list.title}
-        </span>
-        <span className="text-xs text-slate-600">{cards.length}</span>
+        {isOver ? (
+          <>
+            <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center shadow-md animate-bounce">
+              <ArrowDown size={16} className="text-white" />
+            </div>
+            <span
+              className="text-xs font-bold text-sky-700 leading-tight text-center px-1"
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "mixed",
+                maxHeight: "120px",
+                overflow: "hidden",
+              }}
+            >
+              {list.title}
+            </span>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => onToggleCollapse(list.id)}
+              className="text-slate-700 hover:text-slate-900 text-xs mt-1 transition-colors"
+              title="展開"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <span
+              className="text-xs font-semibold text-slate-700"
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "mixed",
+                maxHeight: "160px",
+                overflow: "hidden",
+              }}
+            >
+              {list.title}
+            </span>
+            <span className="text-xs text-slate-600">{cards.length}</span>
+          </>
+        )}
       </div>
     );
   }
