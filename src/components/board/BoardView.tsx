@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, Calendar, CheckSquare } from "lucide-react";
+import { ChevronLeft, Calendar, CheckSquare, ArrowRightLeft, X } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -27,6 +27,7 @@ import BoardExportButton from "./BoardExportButton";
 import { CardModalProvider, useCardModal } from "@/context/CardModalContext";
 import CardModal from "@/components/card-modal/CardModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
+import { moveCard } from "@/actions/card.actions";
 import { formatDate, isOverdue, getMemberInitials } from "@/lib/utils";
 import type { BoardState, List, CardWithLabels } from "@/types/app.types";
 
@@ -34,9 +35,61 @@ type CardUpdate = Partial<
   Pick<CardWithLabels, "due_date" | "card_labels" | "card_members" | "checklists">
 > & { id: string };
 
+// ── Mobile: list picker bottom sheet ─────────────────────────────────────────
+type MobileListPickerProps = {
+  lists: List[];
+  currentListId: string;
+  onSelect: (listId: string) => void;
+  onClose: () => void;
+};
+
+function MobileListPicker({ lists, currentListId, onSelect, onClose }: MobileListPickerProps) {
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/40 z-[60]" onClick={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl shadow-2xl pb-safe">
+        <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-slate-100">
+          <span className="text-sm font-semibold text-slate-800">移動先リストを選択</span>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="overflow-y-auto max-h-64 py-2 px-2">
+          {lists
+            .filter((l) => l.id !== currentListId)
+            .map((list) => (
+              <button
+                key={list.id}
+                onClick={() => onSelect(list.id)}
+                className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+              >
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0 border border-black/10"
+                  style={{ backgroundColor: list.color ?? "#e2e8f0" }}
+                />
+                {list.title}
+              </button>
+            ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── Mobile: card row (tap to open modal, no drag) ────────────────────────────
-function MobileCardRow({ card }: { card: CardWithLabels }) {
+type MobileCardRowProps = {
+  card: CardWithLabels;
+  currentListId: string;
+  allLists: List[];
+  onMoveCard: (cardId: string, targetListId: string) => void;
+};
+
+function MobileCardRow({ card, currentListId, allLists, onMoveCard }: MobileCardRowProps) {
   const { openCard } = useCardModal();
+  const [showPicker, setShowPicker] = useState(false);
   const overdue = isOverdue(card.due_date);
   const totalItems = card.checklists.reduce((s, cl) => s + cl.checklist_items.length, 0);
   const doneItems = card.checklists.reduce(
@@ -45,77 +98,105 @@ function MobileCardRow({ card }: { card: CardWithLabels }) {
   );
 
   return (
-    <button
-      onClick={() => openCard(card.id)}
-      className="w-full text-left bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm active:scale-[0.98] transition-transform"
-    >
-      {card.card_labels.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {card.card_labels.map(({ labels }) => (
-            <span
-              key={labels.id}
-              className="inline-block w-8 h-1.5 rounded-full"
-              style={{ backgroundColor: labels.color }}
-            />
-          ))}
-        </div>
-      )}
-      <p className="text-sm text-slate-800 leading-snug">{card.title}</p>
-      {(card.due_date || totalItems > 0 || card.card_members.length > 0) && (
-        <div className="mt-2 flex items-center flex-wrap gap-1.5">
-          {card.due_date && (
-            <span
-              className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
-                overdue
-                  ? "bg-red-50 text-red-600 border border-red-100"
-                  : "bg-slate-50 text-slate-500 border border-slate-100"
-              }`}
-            >
-              <Calendar size={11} />
-              {formatDate(card.due_date)}
-            </span>
-          )}
-          {totalItems > 0 && (
-            <span
-              className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
-                doneItems === totalItems
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-slate-50 text-slate-500 border border-slate-100"
-              }`}
-            >
-              <CheckSquare size={11} />
-              {doneItems}/{totalItems}
-            </span>
-          )}
-          {card.card_members.length > 0 && (
-            <div className="flex -space-x-1.5 ml-auto">
-              {card.card_members.slice(0, 4).map(({ members }) => (
+    <>
+      <div className="relative w-full bg-white rounded-xl border border-slate-200/80 shadow-sm active:scale-[0.98] transition-transform">
+        {/* Move button */}
+        <button
+          onClick={() => setShowPicker(true)}
+          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-slate-300 hover:text-sky-500 hover:bg-sky-50 active:bg-sky-100 transition-colors z-10"
+          title="別リストに移動"
+        >
+          <ArrowRightLeft size={13} />
+        </button>
+
+        {/* Tap area to open modal */}
+        <button
+          onClick={() => openCard(card.id)}
+          className="w-full text-left p-3 pr-9"
+        >
+          {card.card_labels.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {card.card_labels.map(({ labels }) => (
                 <span
-                  key={members.id}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm"
-                  style={{ backgroundColor: members.color }}
-                  title={members.name}
-                >
-                  {getMemberInitials(members.name)}
-                </span>
+                  key={labels.id}
+                  className="inline-block w-8 h-1.5 rounded-full"
+                  style={{ backgroundColor: labels.color }}
+                />
               ))}
             </div>
           )}
-        </div>
+          <p className="text-sm text-slate-800 leading-snug">{card.title}</p>
+          {(card.due_date || totalItems > 0 || card.card_members.length > 0) && (
+            <div className="mt-2 flex items-center flex-wrap gap-1.5">
+              {card.due_date && (
+                <span
+                  className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                    overdue
+                      ? "bg-red-50 text-red-600 border border-red-100"
+                      : "bg-slate-50 text-slate-500 border border-slate-100"
+                  }`}
+                >
+                  <Calendar size={11} />
+                  {formatDate(card.due_date)}
+                </span>
+              )}
+              {totalItems > 0 && (
+                <span
+                  className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                    doneItems === totalItems
+                      ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                      : "bg-slate-50 text-slate-500 border border-slate-100"
+                  }`}
+                >
+                  <CheckSquare size={11} />
+                  {doneItems}/{totalItems}
+                </span>
+              )}
+              {card.card_members.length > 0 && (
+                <div className="flex -space-x-1.5 ml-auto">
+                  {card.card_members.slice(0, 4).map(({ members }) => (
+                    <span
+                      key={members.id}
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-sm"
+                      style={{ backgroundColor: members.color }}
+                      title={members.name}
+                    >
+                      {getMemberInitials(members.name)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </button>
+      </div>
+
+      {showPicker && (
+        <MobileListPicker
+          lists={allLists}
+          currentListId={currentListId}
+          onSelect={(targetListId) => {
+            setShowPicker(false);
+            onMoveCard(card.id, targetListId);
+          }}
+          onClose={() => setShowPicker(false)}
+        />
       )}
-    </button>
+    </>
   );
 }
 
 // ── Mobile: fullscreen list sheet ────────────────────────────────────────────
 type MobileListSheetProps = {
   list: List;
+  allLists: List[];
   cards: CardWithLabels[];
   onClose: () => void;
   onCardCreated: (card: CardWithLabels) => void;
+  onMoveCard: (cardId: string, targetListId: string) => void;
 };
 
-function MobileListSheet({ list, cards, onClose, onCardCreated }: MobileListSheetProps) {
+function MobileListSheet({ list, allLists, cards, onClose, onCardCreated, onMoveCard }: MobileListSheetProps) {
   const accentColor = list.color ?? "#e2e8f0";
   return (
     <>
@@ -150,7 +231,15 @@ function MobileListSheet({ list, cards, onClose, onCardCreated }: MobileListShee
           {cards.length === 0 ? (
             <p className="text-center text-sm text-slate-400 py-12">カードがありません</p>
           ) : (
-            cards.map((card) => <MobileCardRow key={card.id} card={card} />)
+            cards.map((card) => (
+              <MobileCardRow
+                key={card.id}
+                card={card}
+                currentListId={list.id}
+                allLists={allLists}
+                onMoveCard={onMoveCard}
+              />
+            ))
           )}
         </div>
 
@@ -246,10 +335,6 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
         [listId]: [...(prev.cardsByList[listId] ?? []), card],
       },
     }));
-    // Update mobile sheet if it's open for this list
-    if (mobileExpandedListId === listId) {
-      setMobileExpandedListId(listId); // re-render sheet with new card
-    }
   }
 
   function handleListColorChanged(listId: string, color: string) {
@@ -289,6 +374,31 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
         ])
       ),
     }));
+  }
+
+  // Mobile: move card to another list
+  async function handleMobileCardMove(cardId: string, targetListId: string) {
+    // Optimistic update: remove from current list, append to target
+    let movedCard: CardWithLabels | undefined;
+    setBoardState((prev) => {
+      const newCardsByList = Object.fromEntries(
+        Object.entries(prev.cardsByList).map(([lid, cards]) => {
+          const filtered = cards.filter((c) => {
+            if (c.id === cardId) { movedCard = c; return false; }
+            return true;
+          });
+          return [lid, filtered];
+        })
+      );
+      if (movedCard) {
+        newCardsByList[targetListId] = [...(newCardsByList[targetListId] ?? []), movedCard];
+      }
+      return { ...prev, cardsByList: newCardsByList };
+    });
+
+    // Persist: place at end of target list
+    const targetCards = boardState.cardsByList[targetListId] ?? [];
+    await moveCard(cardId, targetListId, (targetCards.length + 1) * 1000).catch(() => {});
   }
 
   // Build background style for the kanban/calendar area
@@ -423,9 +533,11 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
       {isMobile && mobileExpandedList && (
         <MobileListSheet
           list={mobileExpandedList}
+          allLists={boardState.lists}
           cards={boardState.cardsByList[mobileExpandedList.id] ?? []}
           onClose={() => setMobileExpandedListId(null)}
           onCardCreated={(card) => handleCardCreated(mobileExpandedList.id, card)}
+          onMoveCard={handleMobileCardMove}
         />
       )}
 
