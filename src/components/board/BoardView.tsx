@@ -515,8 +515,8 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                 title="検索・フィルター"
                 className={`relative p-1.5 rounded-lg transition-colors ${
                   showFilterBar || isFiltered
-                    ? "bg-sky-100 text-sky-600"
-                    : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    ? "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400"
+                    : "text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 }`}
               >
                 <Search size={15} />
@@ -529,11 +529,6 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
             {/* Center: stats */}
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span>全{stats.total}件</span>
-              {stats.totalItems > 0 && (
-                <span className="text-slate-400">
-                  ✓ {stats.doneItems}/{stats.totalItems}
-                </span>
-              )}
               {stats.overdue > 0 && (
                 <button
                   onClick={() => {

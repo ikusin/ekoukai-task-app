@@ -134,24 +134,30 @@ export function useDragAndDrop(
         ? resolvedId
         : currentListId;
 
-    // Reorder within same list (expanded lists only — card is already there
-    // due to optimistic handleDragOver update)
+    // Reorder within same list
     if (currentListId === targetListId && activeCardId !== overId) {
-      setBoardState((prev) => {
-        const listCards = [...(prev.cardsByList[currentListId] ?? [])];
-        const oldIndex = listCards.findIndex((c) => c.id === activeCardId);
-        const newIndex = listCards.findIndex((c) => c.id === overId);
+      const listCards = boardState.cardsByList[currentListId] ?? [];
+      const oldIndex = listCards.findIndex((c) => c.id === activeCardId);
+      const newIndex = listCards.findIndex((c) => c.id === overId);
 
-        if (oldIndex === -1 || newIndex === -1) return prev;
-
-        return {
+      if (oldIndex !== -1 && newIndex !== -1) {
+        setBoardState((prev) => ({
           ...prev,
           cardsByList: {
             ...prev.cardsByList,
-            [currentListId]: arrayMove(listCards, oldIndex, newIndex),
+            [currentListId]: arrayMove(
+              [...(prev.cardsByList[currentListId] ?? [])],
+              oldIndex,
+              newIndex
+            ),
           },
-        };
-      });
+        }));
+        // Pass the correct target index so the DB reflects the new order
+        moveCard(activeCardId, targetListId, newIndex).catch(() =>
+          window.location.reload()
+        );
+      }
+      return; // prevent falling through to the generic moveCard call below
     }
 
     // Dropped on a collapsed list: handleDragOver skipped the optimistic move,

@@ -174,7 +174,7 @@ export default function ListColumn({
     <div
       ref={setSortableRef}
       style={sortableStyle}
-      className="flex-shrink-0 w-[85vw] md:w-72 flex flex-col rounded-xl max-h-full shadow-sm overflow-hidden border border-black/5 dark:border-white/10"
+      className="flex-shrink-0 w-[85vw] md:w-72 flex flex-col rounded-xl max-h-full shadow-sm border border-black/5 dark:border-white/10"
     >
       <ListHeader
         list={list}
@@ -206,7 +206,7 @@ export default function ListColumn({
         </SortableContext>
       </div>
 
-      <div className="px-2.5 pb-2.5 pt-1.5 bg-slate-100/80 dark:bg-slate-700/80">
+      <div className="px-2.5 pb-2.5 pt-1.5 bg-slate-100/80 dark:bg-slate-700/80 rounded-b-xl">
         <AddCardButton listId={list.id} onCardCreated={onCardCreated} />
       </div>
     </div>

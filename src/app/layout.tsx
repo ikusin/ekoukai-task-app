@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-export const metadata: Metadata = {
-  title: "恵佼会タスク管理",
-  description: "恵佼会タスク管理アプリ",
-};
+export function generateMetadata(): Metadata {
+  const isDev = process.env.NODE_ENV === "development";
+  return {
+    title: isDev ? "【開発】恵佼会タスク管理" : "恵佼会タスク管理",
+    description: "恵佼会タスク管理アプリ",
+  };
+}
 
 export default function RootLayout({
   children,

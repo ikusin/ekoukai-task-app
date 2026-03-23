@@ -61,7 +61,7 @@ export default function BoardBackgroundPicker({ boardId, current, onChange }: Pr
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <button
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-700 dark:border-slate-600 rounded-lg transition-colors border border-slate-200"
           title="背景を変更"
         >
           <Palette size={16} /> 背景

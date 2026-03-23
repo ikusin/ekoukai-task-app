@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { Tag, Check } from "lucide-react";
+import { Tag, Check, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Label } from "@/types/app.types";
 
@@ -36,6 +36,7 @@ export default function CardLabels({
   const [active, setActive] = useState<Label[]>(activeLabels);
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function toggleLabel(label: Label) {
     const supabase = createClient();
@@ -58,6 +59,19 @@ export default function CardLabels({
       setActive(updated);
       onUpdate(updated);
     }
+  }
+
+  async function deleteLabel(label: Label, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`「${label.name}」を削除しますか？`)) return;
+    setDeletingId(label.id);
+    const supabase = createClient();
+    await supabase.from("labels").delete().eq("id", label.id);
+    setLabels((prev) => prev.filter((l) => l.id !== label.id));
+    const updatedActive = active.filter((l) => l.id !== label.id);
+    setActive(updatedActive);
+    onUpdate(updatedActive);
+    setDeletingId(null);
   }
 
   async function createLabel() {
@@ -113,22 +127,31 @@ export default function CardLabels({
               {labels.map((label) => {
                 const isActive = active.some((l) => l.id === label.id);
                 return (
-                  <button
-                    key={label.id}
-                    onClick={() => toggleLabel(label)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <span
-                      className="w-6 h-6 rounded flex-shrink-0"
-                      style={{ backgroundColor: label.color }}
-                    />
-                    <span className="flex-1 text-sm text-left text-slate-700 dark:text-slate-200">
-                      {label.name}
-                    </span>
-                    {isActive && (
-                      <Check size={14} className="text-sky-500" />
-                    )}
-                  </button>
+                  <div key={label.id} className="flex items-center gap-1 group">
+                    <button
+                      onClick={() => toggleLabel(label)}
+                      className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors min-w-0"
+                    >
+                      <span
+                        className="w-6 h-6 rounded flex-shrink-0"
+                        style={{ backgroundColor: label.color }}
+                      />
+                      <span className="flex-1 text-sm text-left text-slate-700 dark:text-slate-200 truncate">
+                        {label.name}
+                      </span>
+                      {isActive && (
+                        <Check size={14} className="text-sky-500 flex-shrink-0" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => deleteLabel(label, e)}
+                      disabled={deletingId === label.id}
+                      className="opacity-40 hover:opacity-100 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-all disabled:opacity-30 flex-shrink-0"
+                      title="ラベルを削除"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 );
               })}
             </div>

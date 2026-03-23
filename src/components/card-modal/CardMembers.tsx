@@ -118,10 +118,10 @@ export default function CardMembers({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="bg-white rounded-xl shadow-xl border border-slate-200 p-4 w-72 z-[100]"
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 w-72 z-[100]"
             sideOffset={5}
           >
-            <p className="text-sm font-semibold text-slate-700 mb-3">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">
               メンバー
             </p>
 
@@ -137,7 +137,7 @@ export default function CardMembers({
                 return (
                   <div
                     key={member.id}
-                    className="relative flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors group"
+                    className="relative flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group"
                   >
                     <button
                       onClick={() => toggleMember(member)}
@@ -149,7 +149,7 @@ export default function CardMembers({
                       >
                         {getMemberInitials(member.name)}
                       </span>
-                      <span className="flex-1 text-xs text-left text-slate-700 truncate">
+                      <span className="flex-1 text-xs text-left text-slate-700 dark:text-slate-300 truncate">
                         {getMemberDisplayName(member.name)}
                       </span>
                       {isActive && (
@@ -159,7 +159,7 @@ export default function CardMembers({
                     <button
                       onClick={(e) => handleDeleteMember(member, e)}
                       disabled={deletingId === member.id}
-                      className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 p-0.5 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all disabled:opacity-50"
+                      className="opacity-40 hover:opacity-100 absolute top-1 right-1 p-0.5 rounded hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all disabled:opacity-50"
                       title="メンバーを削除"
                     >
                       <Trash2 size={11} />
@@ -170,8 +170,8 @@ export default function CardMembers({
             </div>
 
             {/* Create member */}
-            <div className="border-t border-slate-200 pt-3">
-              <p className="text-xs text-slate-500 mb-2">
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
                 新しいメンバーを追加
               </p>
               <input
@@ -180,7 +180,7 @@ export default function CardMembers({
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateMember()}
                 placeholder="名前（例: 宮田&quot;田&quot;）"
-                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-1"
+                className="w-full px-2 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 mb-1 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100"
               />
               <p className="text-xs text-slate-400 mb-2">
                 アイコン文字を指定: <span className="font-mono">宮田&quot;田&quot;</span> → アイコンに「田」

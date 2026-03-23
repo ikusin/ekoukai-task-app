@@ -37,7 +37,7 @@ export default function BoardExportButton({ boardId, boardTitle }: Props) {
     <button
       onClick={handleExport}
       disabled={loading}
-      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 disabled:opacity-50"
+      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-700 dark:border-slate-600 rounded-lg transition-colors border border-slate-200 disabled:opacity-50"
       title="ボードをエクスポート"
     >
       {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} エクスポート
