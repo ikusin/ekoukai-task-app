@@ -317,6 +317,29 @@ export async function getTemplates(): Promise<{
   return { data: data as unknown as ChecklistTemplateWithItems[] };
 }
 
+export async function reorderChecklistItems(
+  checklistId: string,
+  itemIds: string[]
+) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const updates = itemIds.map((id, index) =>
+    supabase
+      .from("checklist_items")
+      .update({ order: index } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .eq("id", id)
+      .eq("checklist_id", checklistId)
+  );
+
+  await Promise.all(updates);
+  revalidatePath("/boards", "layout");
+  return { success: true };
+}
+
 export async function deleteTemplate(id: string) {
   const supabase = createClient();
   const {

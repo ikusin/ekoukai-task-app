@@ -2,7 +2,22 @@
 
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
-import { CheckSquare, X, Plus, UserPlus } from "lucide-react";
+import { CheckSquare, X, Plus, UserPlus, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   addChecklistItem,
   toggleChecklistItem,
@@ -12,9 +27,10 @@ import {
   updateChecklistItemDueDate,
   updateChecklistItemAssignee,
   saveChecklistAsTemplate,
+  reorderChecklistItems,
 } from "@/actions/checklist.actions";
 import { isOverdue, formatDate, getMemberInitials, getMemberDisplayName } from "@/lib/utils";
-import type { ChecklistWithItems, ChecklistTemplateWithItems } from "@/types/app.types";
+import type { ChecklistWithItems, ChecklistTemplateWithItems, ChecklistItem } from "@/types/app.types";
 import type { Member } from "@/types/app.types";
 
 type Props = {
@@ -24,6 +40,172 @@ type Props = {
   onUpdated: (checklist: ChecklistWithItems) => void;
   onTemplateSaved?: (template: ChecklistTemplateWithItems) => void;
 };
+
+type SortableItemProps = {
+  item: ChecklistItem;
+  boardMembers: Member[];
+  onToggle: (itemId: string, isDone: boolean) => void;
+  onDelete: (itemId: string) => void;
+  onDueDateChange: (itemId: string, value: string) => void;
+  onAssignee: (itemId: string, assigneeId: string | null) => void;
+};
+
+function SortableChecklistItem({
+  item,
+  boardMembers,
+  onToggle,
+  onDelete,
+  onDueDateChange,
+  onAssignee,
+}: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  const overdue = isOverdue(item.due_date ?? null);
+  const assignee = boardMembers.find((m) => m.id === item.assignee_id) ?? null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="flex items-center gap-1 group"
+    >
+      {/* Drag handle */}
+      <div
+        ref={setActivatorNodeRef}
+        {...listeners}
+        className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex-shrink-0 transition-opacity select-none"
+        title="ドラッグして並び替え"
+      >
+        <GripVertical size={14} />
+      </div>
+
+      <input
+        type="checkbox"
+        checked={item.is_done}
+        onChange={(e) => onToggle(item.id, e.target.checked)}
+        className="flex-shrink-0 accent-sky-500 w-4 h-4 cursor-pointer"
+      />
+      <span
+        className={`flex-1 text-sm min-w-0 ${
+          item.is_done ? "line-through text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200"
+        }`}
+      >
+        {item.text}
+      </span>
+
+      {/* Assignee badge (always visible when set) */}
+      {assignee && (
+        <span
+          className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex-shrink-0 flex items-center gap-1"
+          title={getMemberDisplayName(assignee.name)}
+        >
+          <span
+            className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+            style={{ backgroundColor: assignee.color }}
+          >
+            {getMemberInitials(assignee.name)}
+          </span>
+          {getMemberDisplayName(assignee.name)}
+        </span>
+      )}
+
+      {/* Due date badge (always visible when set) */}
+      {item.due_date && (
+        <span
+          className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+            overdue
+              ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400"
+              : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+          }`}
+        >
+          {overdue ? "期限切れ" : formatDate(item.due_date)}
+        </span>
+      )}
+
+      {/* Assignee picker (hover) */}
+      {boardMembers.length > 0 && (
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <button
+              className="opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity"
+              title="担当者を設定"
+            >
+              <UserPlus size={13} className="text-slate-400 hover:text-sky-500" />
+            </button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              side="top"
+              align="end"
+              sideOffset={4}
+              className="z-[110] w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1"
+            >
+              <p className="text-xs text-slate-400 px-2 py-1">担当者</p>
+              {assignee && (
+                <button
+                  onClick={() => onAssignee(item.id, null)}
+                  className="w-full text-left text-xs px-2 py-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-500 transition-colors"
+                >
+                  解除
+                </button>
+              )}
+              {boardMembers.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => onAssignee(item.id, m.id)}
+                  className={`w-full flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-colors ${
+                    m.id === item.assignee_id
+                      ? "bg-sky-50 text-sky-700"
+                      : "hover:bg-slate-50 text-slate-700"
+                  }`}
+                >
+                  <span
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                    style={{ backgroundColor: m.color }}
+                  >
+                    {getMemberInitials(m.name)}
+                  </span>
+                  <span className="truncate">{getMemberDisplayName(m.name)}</span>
+                </button>
+              ))}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      )}
+
+      {/* Date input (hover) */}
+      <input
+        type="date"
+        value={item.due_date ?? ""}
+        onChange={(e) => onDueDateChange(item.id, e.target.value)}
+        className="opacity-0 group-hover:opacity-100 text-xs px-1.5 py-0.5 border border-slate-200 rounded focus:outline-none focus:border-sky-400 w-28 flex-shrink-0 transition-opacity"
+        title="期日を設定"
+      />
+
+      <button
+        onClick={() => onDelete(item.id)}
+        className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-red-500 transition-all flex-shrink-0"
+      >
+        <X size={13} />
+      </button>
+    </div>
+  );
+}
 
 export default function CardChecklist({
   checklist,
@@ -39,9 +221,25 @@ export default function CardChecklist({
   const [titleValue, setTitleValue] = useState(checklist.title);
   const [savingTemplate, setSavingTemplate] = useState(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
   const doneCount = items.filter((i) => i.is_done).length;
   const total = items.length;
   const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    const newItems = arrayMove(items, oldIndex, newIndex);
+    setItems(newItems);
+    onUpdated({ ...checklist, checklist_items: newItems });
+    reorderChecklistItems(checklist.id, newItems.map((i) => i.id));
+  }
 
   async function handleToggle(itemId: string, isDone: boolean) {
     await toggleChecklistItem(itemId, isDone);
@@ -185,126 +383,30 @@ export default function CardChecklist({
       )}
 
       {/* Items */}
-      <div className="space-y-1.5 mb-3">
-        {items.map((item) => {
-          const overdue = isOverdue(item.due_date ?? null);
-          const assignee = boardMembers.find((m) => m.id === item.assignee_id) ?? null;
-
-          return (
-            <div key={item.id} className="flex items-center gap-2 group">
-              <input
-                type="checkbox"
-                checked={item.is_done}
-                onChange={(e) => handleToggle(item.id, e.target.checked)}
-                className="flex-shrink-0 accent-sky-500 w-4 h-4 cursor-pointer"
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={items.map((i) => i.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-1.5 mb-3">
+            {items.map((item) => (
+              <SortableChecklistItem
+                key={item.id}
+                item={item}
+                boardMembers={boardMembers}
+                onToggle={handleToggle}
+                onDelete={handleDeleteItem}
+                onDueDateChange={handleItemDueDateChange}
+                onAssignee={handleAssignee}
               />
-              <span
-                className={`flex-1 text-sm min-w-0 ${
-                  item.is_done ? "line-through text-slate-400 dark:text-slate-500" : "text-slate-700 dark:text-slate-200"
-                }`}
-              >
-                {item.text}
-              </span>
-
-              {/* Assignee badge (always visible when set) */}
-              {assignee && (
-                <span
-                  className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex-shrink-0 flex items-center gap-1"
-                  title={getMemberDisplayName(assignee.name)}
-                >
-                  <span
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                    style={{ backgroundColor: assignee.color }}
-                  >
-                    {getMemberInitials(assignee.name)}
-                  </span>
-                  {getMemberDisplayName(assignee.name)}
-                </span>
-              )}
-
-              {/* Due date badge (always visible when set) */}
-              {item.due_date && (
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                    overdue
-                      ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400"
-                      : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                  }`}
-                >
-                  {overdue ? "期限切れ" : formatDate(item.due_date)}
-                </span>
-              )}
-
-              {/* Assignee picker (hover) */}
-              {boardMembers.length > 0 && (
-                <Popover.Root>
-                  <Popover.Trigger asChild>
-                    <button
-                      className="opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity"
-                      title="担当者を設定"
-                    >
-                      <UserPlus size={13} className="text-slate-400 hover:text-sky-500" />
-                    </button>
-                  </Popover.Trigger>
-                  <Popover.Portal>
-                    <Popover.Content
-                      side="top"
-                      align="end"
-                      sideOffset={4}
-                      className="z-[110] w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-1"
-                    >
-                      <p className="text-xs text-slate-400 px-2 py-1">担当者</p>
-                      {assignee && (
-                        <button
-                          onClick={() => handleAssignee(item.id, null)}
-                          className="w-full text-left text-xs px-2 py-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-500 transition-colors"
-                        >
-                          解除
-                        </button>
-                      )}
-                      {boardMembers.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => handleAssignee(item.id, m.id)}
-                          className={`w-full flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-colors ${
-                            m.id === item.assignee_id
-                              ? "bg-sky-50 text-sky-700"
-                              : "hover:bg-slate-50 text-slate-700"
-                          }`}
-                        >
-                          <span
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                            style={{ backgroundColor: m.color }}
-                          >
-                            {getMemberInitials(m.name)}
-                          </span>
-                          <span className="truncate">{getMemberDisplayName(m.name)}</span>
-                        </button>
-                      ))}
-                    </Popover.Content>
-                  </Popover.Portal>
-                </Popover.Root>
-              )}
-
-              {/* Date input (hover) */}
-              <input
-                type="date"
-                value={item.due_date ?? ""}
-                onChange={(e) => handleItemDueDateChange(item.id, e.target.value)}
-                className="opacity-0 group-hover:opacity-100 text-xs px-1.5 py-0.5 border border-slate-200 rounded focus:outline-none focus:border-sky-400 w-28 flex-shrink-0 transition-opacity"
-                title="期日を設定"
-              />
-
-              <button
-                onClick={() => handleDeleteItem(item.id)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 hover:text-red-500 transition-all flex-shrink-0"
-              >
-                <X size={13} />
-              </button>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Add item */}
       {addingItem ? (
