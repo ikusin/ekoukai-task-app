@@ -214,7 +214,9 @@ export default function CardChecklist({
   onUpdated,
   onTemplateSaved,
 }: Props) {
-  const [items, setItems] = useState(checklist.checklist_items);
+  const [items, setItems] = useState(
+    [...checklist.checklist_items].sort((a, b) => a.order - b.order)
+  );
   const [newText, setNewText] = useState("");
   const [addingItem, setAddingItem] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
