@@ -24,6 +24,7 @@ import CalendarView from "./CalendarView";
 import GanttView from "./GanttView";
 import BoardBackgroundPicker from "./BoardBackgroundPicker";
 import BoardExportButton from "./BoardExportButton";
+import CopyListModal from "./CopyListModal";
 import { CardModalProvider, useCardModal } from "@/context/CardModalContext";
 import CardModal from "@/components/card-modal/CardModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
@@ -272,6 +273,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
   const [doneListIds, setDoneListIds] = useState<Set<string>>(new Set());
   const [view, setView] = useState<"kanban" | "calendar" | "gantt">("kanban");
   const [background, setBackground] = useState<string | null>(initialBackground);
+  const [copyListId, setCopyListId] = useState<string | null>(null);
 
   // Search / filter state
   type DueFilter = "all" | "overdue" | "today" | "week";
@@ -665,6 +667,7 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
                       onListColorChanged={handleListColorChanged}
                       onToggleCollapse={handleToggleCollapse}
                       onToggleDoneList={() => handleToggleDoneList(list.id)}
+                      onCopyToBoard={() => setCopyListId(list.id)}
                       onMobileTap={isMobile ? () => setMobileExpandedListId(list.id) : undefined}
                     />
                   ))}
@@ -718,6 +721,15 @@ export default function BoardView({ boardId, boardTitle, initialState, initialBa
       )}
 
       <CardModal />
+
+      {copyListId && (
+        <CopyListModal
+          listId={copyListId}
+          listTitle={boardState.lists.find((l) => l.id === copyListId)?.title ?? ""}
+          currentBoardId={boardId}
+          onClose={() => setCopyListId(null)}
+        />
+      )}
     </CardModalProvider>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, ChevronDown, ChevronRight, MoreHorizontal, ArrowUpDown, Check } from "lucide-react";
+import { GripVertical, ChevronDown, ChevronRight, MoreHorizontal, ArrowUpDown, Check, Copy } from "lucide-react";
 import { updateList, deleteList } from "@/actions/list.actions";
 import type { List } from "@/types/app.types";
 
@@ -41,6 +41,7 @@ type Props = {
   onDeleted: () => void;
   onColorChange: (color: string) => void;
   onToggleCollapse: () => void;
+  onCopyToBoard?: () => void;
 };
 
 export default function ListHeader({
@@ -55,6 +56,7 @@ export default function ListHeader({
   onDeleted,
   onColorChange,
   onToggleCollapse,
+  onCopyToBoard,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(list.title);
@@ -211,6 +213,16 @@ export default function ListHeader({
                   ))}
                 </div>
               </div>
+
+              {onCopyToBoard && (
+                <button
+                  onClick={() => { setShowMenu(false); onCopyToBoard(); }}
+                  className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border-t border-slate-100 dark:border-slate-700"
+                >
+                  <Copy size={14} />
+                  別のボードにコピー
+                </button>
+              )}
 
               <button
                 onClick={handleDelete}

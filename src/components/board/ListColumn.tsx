@@ -24,6 +24,7 @@ type Props = {
   onListColorChanged: (listId: string, color: string) => void;
   onToggleCollapse: (listId: string) => void;
   onToggleDoneList: () => void;
+  onCopyToBoard?: () => void;
   /** Mobile only: tap collapsed list to open fullscreen sheet */
   onMobileTap?: () => void;
 };
@@ -38,6 +39,7 @@ export default function ListColumn({
   onListColorChanged,
   onToggleCollapse,
   onToggleDoneList,
+  onCopyToBoard,
   onMobileTap,
 }: Props) {
   const {
@@ -188,6 +190,7 @@ export default function ListColumn({
         onDeleted={() => onListDeleted(list.id)}
         onColorChange={(color) => onListColorChanged(list.id, color)}
         onToggleCollapse={() => onToggleCollapse(list.id)}
+        onCopyToBoard={onCopyToBoard}
       />
 
       <div
