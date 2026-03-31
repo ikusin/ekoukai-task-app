@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, ChevronLeft, ChevronRight, Moon, Sun, Download } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Moon, Sun, Download, ChevronDown } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   DndContext,
@@ -113,7 +113,8 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
             <Popover.Trigger asChild>
               <button className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-2 transition-colors">
                 <Download size={16} />
-                ボードをインポート
+                <span className="flex-1">インポート</span>
+                <ChevronDown size={14} className="opacity-60" />
               </button>
             </Popover.Trigger>
             <Popover.Portal>
