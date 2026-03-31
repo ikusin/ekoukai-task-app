@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Download } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { importBoard } from "@/actions/board-transfer.actions";
 import type { BoardExportData } from "@/actions/board-transfer.actions";
 
@@ -66,10 +66,7 @@ export default function ImportBoardButton() {
             インポート中...
           </>
         ) : (
-          <>
-            <Download size={16} />
-            ボードをインポート
-          </>
+          "他のボードをインポート"
         )}
       </button>
     </>

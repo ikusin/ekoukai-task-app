@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, ChevronLeft, ChevronRight, Moon, Sun } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Moon, Sun, Download } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   DndContext,
@@ -22,6 +22,8 @@ import { createClient } from "@/lib/supabase/client";
 import SidebarBoardItem from "./SidebarBoardItem";
 import CreateBoardModal from "./CreateBoardModal";
 import ImportBoardButton from "./ImportBoardButton";
+import ImportTrelloButton from "./ImportTrelloButton";
+import * as Popover from "@radix-ui/react-popover";
 import { reorderBoards } from "@/actions/board.actions";
 import type { Board } from "@/types/app.types";
 
@@ -107,7 +109,25 @@ export default function Sidebar({ boards: initialBoards }: { boards: Board[] }) 
         </DndContext>
         <div className="mt-1 space-y-0.5">
           <CreateBoardModal />
-          <ImportBoardButton />
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <button className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-2 transition-colors">
+                <Download size={16} />
+                ボードをインポート
+              </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                side="right"
+                align="start"
+                sideOffset={8}
+                className="z-[300] w-52 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1"
+              >
+                <ImportBoardButton />
+                <ImportTrelloButton />
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
         </div>
       </div>
 

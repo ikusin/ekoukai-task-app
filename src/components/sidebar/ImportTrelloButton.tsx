@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const TRELLO_COLOR_MAP: Record<string, string> = {
@@ -205,9 +206,16 @@ export default function ImportTrelloButton() {
       <button
         onClick={() => inputRef.current?.click()}
         disabled={importing}
-        className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+        className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
       >
-        {importing ? "⏳ インポート中..." : "📥 Trelloからインポート"}
+        {importing ? (
+          <>
+            <Loader2 size={16} className="animate-spin" />
+            インポート中...
+          </>
+        ) : (
+          "Trelloからインポート"
+        )}
       </button>
       {error && (
         <p className="text-xs text-red-500 px-3 py-1">{error}</p>
