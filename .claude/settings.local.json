@@ -3,7 +3,11 @@
     "allow": [
       "Bash(taskkill:*)",
       "Bash(Remove-Item -Recurse -Force \"c:/Users/staff-102/Desktop/プロジェクト管理ツール/.next\")",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm run start:*)"
     ]
   }
 }

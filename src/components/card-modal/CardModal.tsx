@@ -20,7 +20,7 @@ import type {
   Label,
   Member,
   ChecklistWithItems,
-  Comment,
+  CommentWithMember,
   ChecklistTemplateWithItems,
 } from "@/types/app.types";
 
@@ -38,7 +38,7 @@ export default function CardModal() {
   const [card, setCard] = useState<CardWithDetails | null>(null);
   const [boardLabels, setBoardLabels] = useState<Label[]>([]);
   const [boardMembers, setBoardMembers] = useState<Member[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentWithMember[]>([]);
   const [templates, setTemplates] = useState<ChecklistTemplateWithItems[]>([]);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
@@ -267,6 +267,7 @@ export default function CardModal() {
                 <CardComments
                   cardId={card.id}
                   initialComments={comments}
+                  boardMembers={boardMembers}
                 />
               </div>
             </div>

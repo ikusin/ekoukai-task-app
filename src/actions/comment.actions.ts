@@ -3,9 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
-import type { Comment } from "@/types/app.types";
+import type { CommentWithMember } from "@/types/app.types";
 
-export async function createComment(input: { cardId: string; text: string }) {
+export async function createComment(input: {
+  cardId: string;
+  text: string;
+  memberId?: string;
+}) {
   const supabase = createClient();
   const {
     data: { user },
@@ -15,6 +19,7 @@ export async function createComment(input: { cardId: string; text: string }) {
   const schema = z.object({
     cardId: z.string().uuid(),
     text: z.string().min(1).max(2000),
+    memberId: z.string().uuid().optional(),
   });
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { error: "Invalid input" };
@@ -25,14 +30,21 @@ export async function createComment(input: { cardId: string; text: string }) {
     .insert({
       card_id: parsed.data.cardId,
       user_id: user.id,
+      member_id: parsed.data.memberId ?? null,
       text: parsed.data.text,
     } as any)
-    .select()
+    .select("*, members(*)")
     .single();
 
   if (error) return { error: error.message };
   revalidatePath("/boards", "layout");
-  return { data: data as unknown as Comment };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = data as any;
+  const comment: CommentWithMember = {
+    ...raw,
+    members: Array.isArray(raw.members) ? (raw.members[0] ?? null) : (raw.members ?? null),
+  };
+  return { data: comment };
 }
 
 export async function updateComment(id: string, text: string) {
@@ -50,11 +62,17 @@ export async function updateComment(id: string, text: string) {
     .update({ text: text.trim() } as any)
     .eq("id", id)
     .eq("user_id", user.id)
-    .select()
+    .select("*, members(*)")
     .single();
 
   if (error) return { error: error.message };
-  return { data: data as unknown as Comment };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = data as any;
+  const comment: CommentWithMember = {
+    ...raw,
+    members: Array.isArray(raw.members) ? (raw.members[0] ?? null) : (raw.members ?? null),
+  };
+  return { data: comment };
 }
 
 export async function deleteComment(id: string) {

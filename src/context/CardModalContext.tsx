@@ -9,7 +9,7 @@ import type {
   Label,
   List,
   Member,
-  Comment,
+  CommentWithMember,
   ChecklistWithItems,
   ChecklistTemplateWithItems,
 } from "@/types/app.types";
@@ -23,7 +23,7 @@ export type CachedCardData = {
   boardLabels: Label[];
   boardMembers: Member[];
   boardLists: List[];
-  comments: Comment[];
+  comments: CommentWithMember[];
   templates: ChecklistTemplateWithItems[];
 };
 
@@ -78,7 +78,7 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
       supabase.from("lists").select("*").eq("board_id", boardId).order("order", { ascending: true }),
       supabase
         .from("card_comments")
-        .select("*")
+        .select("*, members(*)")
         .eq("card_id", cardId)
         .order("created_at", { ascending: true }),
       getTemplates(),
@@ -113,7 +113,11 @@ export function CardModalProvider({ boardId, children, onCardUpdated, onCardDele
         boardLabels: (labelsRes.data as Label[]) ?? [],
         boardMembers: (membersRes.data as Member[]) ?? [],
         boardLists: (listsRes.data as List[]) ?? [],
-        comments: (commentsRes.data as Comment[]) ?? [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        comments: ((commentsRes.data ?? []) as any[]).map((c) => ({
+          ...c,
+          members: Array.isArray(c.members) ? (c.members[0] ?? null) : (c.members ?? null),
+        })) as CommentWithMember[],
         templates: tplResult.data ?? [],
       };
 

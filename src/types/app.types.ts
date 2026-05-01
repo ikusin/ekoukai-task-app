@@ -11,6 +11,9 @@ export type ChecklistItem =
   Database["public"]["Tables"]["checklist_items"]["Row"];
 export type CardLabel = Database["public"]["Tables"]["card_labels"]["Row"];
 export type Comment = Database["public"]["Tables"]["card_comments"]["Row"];
+export type CommentWithMember = Comment & {
+  members: Member | null;
+};
 export type ChecklistTemplate =
   Database["public"]["Tables"]["checklist_templates"]["Row"];
 export type ChecklistTemplateItem =

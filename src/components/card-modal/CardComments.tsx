@@ -4,11 +4,13 @@ import { useState } from "react";
 import { MessageSquare, Pencil, Check, X } from "lucide-react";
 import { createComment, deleteComment, updateComment } from "@/actions/comment.actions";
 import LinkifiedText from "@/components/ui/LinkifiedText";
-import type { Comment } from "@/types/app.types";
+import { getMemberInitials, getMemberDisplayName } from "@/lib/utils";
+import type { CommentWithMember, Member } from "@/types/app.types";
 
 type Props = {
   cardId: string;
-  initialComments: Comment[];
+  initialComments: CommentWithMember[];
+  boardMembers: Member[];
 };
 
 function formatDateTime(iso: string) {
@@ -22,17 +24,36 @@ function formatDateTime(iso: string) {
   });
 }
 
-export default function CardComments({ cardId, initialComments }: Props) {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+function MemberAvatar({ member }: { member: Member }) {
+  const initials = getMemberInitials(member.name);
+  const displayName = getMemberDisplayName(member.name);
+  return (
+    <span
+      className="w-5 h-5 rounded-full flex items-center justify-center font-bold text-white text-[10px] flex-shrink-0"
+      style={{ backgroundColor: member.color }}
+      title={displayName}
+    >
+      {initials}
+    </span>
+  );
+}
+
+export default function CardComments({ cardId, initialComments, boardMembers }: Props) {
+  const [comments, setComments] = useState<CommentWithMember[]>(initialComments);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   async function handleSubmit() {
     if (!text.trim()) return;
     setSubmitting(true);
-    const result = await createComment({ cardId, text: text.trim() });
+    const result = await createComment({
+      cardId,
+      text: text.trim(),
+      memberId: selectedMemberId ?? undefined,
+    });
     if (result.data) {
       setComments((prev) => [...prev, result.data!]);
       setText("");
@@ -45,7 +66,7 @@ export default function CardComments({ cardId, initialComments }: Props) {
     setComments((prev) => prev.filter((c) => c.id !== id));
   }
 
-  function startEdit(comment: Comment) {
+  function startEdit(comment: CommentWithMember) {
     setEditingId(comment.id);
     setEditingText(comment.text);
   }
@@ -60,7 +81,9 @@ export default function CardComments({ cardId, initialComments }: Props) {
     const result = await updateComment(id, editingText.trim());
     if (result.data) {
       setComments((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, text: editingText.trim() } : c))
+        prev.map((c) =>
+          c.id === id ? { ...c, text: editingText.trim(), members: result.data!.members } : c
+        )
       );
       setEditingId(null);
     }
@@ -77,11 +100,19 @@ export default function CardComments({ cardId, initialComments }: Props) {
         <div className="space-y-2 mb-4">
           {comments.map((comment) => (
             <div key={comment.id} className="group">
-              {/* Date + actions row */}
+              {/* Member + date + actions row */}
               <div className="flex items-center justify-between mb-0.5 px-1">
-                <span className="text-xs text-slate-400">
-                  {formatDateTime(comment.created_at)}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {comment.members && <MemberAvatar member={comment.members} />}
+                  {comment.members && (
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                      {getMemberDisplayName(comment.members.name)}
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-400">
+                    {formatDateTime(comment.created_at)}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                   {editingId !== comment.id && (
                     <button
@@ -145,6 +176,39 @@ export default function CardComments({ cardId, initialComments }: Props) {
 
       {/* Add comment */}
       <div className="space-y-2">
+        {/* Member selector */}
+        {boardMembers.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0">投稿者:</span>
+            {boardMembers.map((member) => {
+              const isSelected = selectedMemberId === member.id;
+              const initials = getMemberInitials(member.name);
+              const displayName = getMemberDisplayName(member.name);
+              return (
+                <button
+                  key={member.id}
+                  onClick={() => setSelectedMemberId(isSelected ? null : member.id)}
+                  title={displayName}
+                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium border transition-all ${
+                    isSelected
+                      ? "border-transparent text-white"
+                      : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 bg-white dark:bg-slate-800"
+                  }`}
+                  style={isSelected ? { backgroundColor: member.color, borderColor: member.color } : {}}
+                >
+                  <span
+                    className="w-4 h-4 rounded-full flex items-center justify-center font-bold text-white text-[9px] flex-shrink-0"
+                    style={{ backgroundColor: isSelected ? "rgba(255,255,255,0.3)" : member.color }}
+                  >
+                    {initials}
+                  </span>
+                  {displayName}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
